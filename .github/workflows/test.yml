@@ -53,7 +53,6 @@ jobs:
       - name: ⚙️ Prepare Django project
         working-directory: ai_agent
         run: |
-          cd ai_agent
           python manage.py flush --no-input
           python manage.py migrate
 
