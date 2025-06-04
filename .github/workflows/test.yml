@@ -62,4 +62,8 @@ jobs:
           DJANGO_SETTINGS_MODULE: ai_agent.settings
           PYTHONWARNINGS: ignore
         run: |
-          pytest -v
+          python manage.py collectstatic --noinput
+          python manage.py flush --no-input
+          python manage.py migrate
+          pytest -v tests/
+
