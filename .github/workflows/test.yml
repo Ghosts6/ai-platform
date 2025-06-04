@@ -1,47 +1,66 @@
-name: Django Tests
+name: Python Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test_db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10.12, 3.11]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: 🐍 Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: 📄 Create .env file
+        run: |
+          cat <<EOF > ai_agent/.env
+          DJANGO_SECRET_KEY=test-secret
+          DJANGO_DEBUG=True
+          DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+          DATABASE_NAME=test_db
+          DATABASE_USER=test_user
+          DATABASE_PASSWORD=test_pass
+          DATABASE_HOST=localhost
+          DATABASE_PORT=5432
+          OPENAI_API_KEY=dummy-key
+          CELERY_BROKER_URL=redis://localhost:6379/0
+          TEST_MODE=True
+          # Optional future use:
+          # DNA_API_URL=
+          # DNA_USERNAME=
+          # DNA_PASSWORD=
+          # LOG_LEVEL=
+          EOF
+
+      - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run tests
-        env:
-          DJANGO_SETTINGS_MODULE: backend.settings.dev
-          SECRET_KEY: testkey
-          DB_NAME: test_db
-          DB_USER: test
-          DB_PASSWORD: test
-          DB_HOST: localhost
+      - name: ⚙️ Prepare Django project
+        working-directory: ai_agent
         run: |
-          pytest --disable-warnings
+          cd ai_agent
+          python manage.py flush --no-input
+          python manage.py migrate
 
+      - name: 🧪 Run Pytest
+        working-directory: ai_agent
+        env:
+          DJANGO_SETTINGS_MODULE: ai_agent.settings
+          PYTHONWARNINGS: ignore
+        run: |
+          pytest -v
