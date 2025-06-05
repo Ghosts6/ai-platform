@@ -38,14 +38,14 @@ MIDDLEWARE = [
 ]
 
 # URL & WSGI
-ROOT_URLCONF = "ai_agent.urls"
-WSGI_APPLICATION = "ai_agent.wsgi.application"
+ROOT_URLCONF = "backend_core.urls"
+WSGI_APPLICATION = "backend_core.wsgi.application"
 
 # Templates
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "Templates"],  # Your custom template directory
+        "DIRS": [BASE_DIR / 'backend_core' /  "Templates"],  # Your custom template directory
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -82,7 +82,9 @@ USE_TZ = True
 
 # Static files setup
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "Static"]
+STATICFILES_DIRS = [
+    BASE_DIR / 'backend_core' / 'Static',
+]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
