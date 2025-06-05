@@ -1,15 +1,34 @@
-from pathlib import Path
 import os
+import sys
 import logging
+import dj_database_url
 from logging.handlers import RotatingFileHandler
+from dotenv import load_dotenv
+from pathlib import Path
 
-# Base directory (Django project root)
+# Base directory & dotenv setup
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(dotenv_path=BASE_DIR / ".env")
 
-# Secret key & debug
-SECRET_KEY = "django-insecure-e^+*y426m-7m#o0a&h*vp$6=1e#@as$g+r6bdqxmwbv$b+zsv2"
-DEBUG = True
-ALLOWED_HOSTS = []
+# ENV VARS
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+IS_TESTING = 'pytest' in sys.modules
+
+# External Services
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+TEST_MODE = os.getenv("TEST_MODE", "False").lower() == "true"
+
+# security settings
+# # **Content Security Policy (CSP)**
+# CSP_DEFAULT_SRC = ["'self'"]  
+# CSP_SCRIPT_SRC = ["'self'"]  
+# CSP_STYLE_SRC = ["'self'", "[https://trusted-cdn.com](https://trusted-cdn.com)"]  
+# CSP_IMG_SRC = ["'self'", "data:"]  
+# CSP_CONNECT_SRC = ["'self'"]  
+# SECURE_REFERRER_POLICY = 'same-origin'
 
 # Installed apps
 INSTALLED_APPS = [
@@ -58,14 +77,25 @@ TEMPLATES = [
     },
 ]
 
-# Database (SQLite)
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# DATABASE 
+if IS_TESTING:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "test_db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=f"postgres://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}/{os.getenv('DATABASE_NAME')}"
+        )
+    }
 
+# Testrunner
+if IS_TESTING:
+    TEST_RUNNER = "pytest_django.runner.DiscoverRunner"
+    
 # Password validators
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

@@ -2,6 +2,7 @@ Django>=4.2,<5.0
 djangorestframework
 python-dotenv
 psycopg2-binary
+dj-database-url
 celery
 apscheduler
 openai
@@ -12,3 +13,4 @@ pytest-django
 pytest-cov
 requests
 # pip install -r requirements.txt 
+# tree  -I 'vevn|staticfiles' --prune
