@@ -63,7 +63,7 @@ jobs:
       - name: 🧪 Run Pytest
         working-directory: ai_agent
         env:
-          DJANGO_SETTINGS_MODULE: ai_agent.settings
+          DJANGO_SETTINGS_MODULE: backend_core.settings
           PYTHONWARNINGS: ignore
         run: |
           python manage.py collectstatic --noinput
