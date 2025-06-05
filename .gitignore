@@ -30,6 +30,11 @@ coverage.xml
 *.pid
 docker-compose.override.yml
 
+# Data bases
+*.db
+*.sqlite
+*.sqlite3
+
 # Others
 *.DS_Store
 

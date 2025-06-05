@@ -1,5 +1,4 @@
 import os
-import sys
 import logging
 import dj_database_url
 from logging.handlers import RotatingFileHandler
@@ -8,13 +7,13 @@ from pathlib import Path
 
 # Base directory & dotenv setup
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(dotenv_path=BASE_DIR / ".env")
+load_dotenv(BASE_DIR / ".env")
 
 # ENV VARS
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
-IS_TESTING = 'pytest' in sys.modules
+IS_TESTING = os.getenv("TEST_MODE", "False") == "True"
 
 # External Services
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -95,7 +94,7 @@ else:
 # Testrunner
 if IS_TESTING:
     TEST_RUNNER = "pytest_django.runner.DiscoverRunner"
-    
+
 # Password validators
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

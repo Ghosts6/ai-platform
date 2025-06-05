@@ -56,6 +56,10 @@ jobs:
           python manage.py flush --no-input
           python manage.py migrate
 
+      - name: 🧼 Clean old SQLite test DB
+        working-directory: ai_agent
+        run: rm -f test_db.sqlite3
+
       - name: 🧪 Run Pytest
         working-directory: ai_agent
         env:
