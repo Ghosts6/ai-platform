@@ -11,6 +11,7 @@ whitenoise
 pytest
 pytest-django
 pytest-cov
+anyio
 requests
 # pip install -r requirements.txt 
-# tree  -I 'vevn|staticfiles' --prune
+# tree  -I 'venv|staticfiles' --prune
