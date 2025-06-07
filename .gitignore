@@ -38,4 +38,4 @@ docker-compose.override.yml
 
 # Others
 *.DS_Store
-
+ai_agent/Logs/
