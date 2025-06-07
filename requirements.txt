@@ -13,5 +13,3 @@ pytest-django
 pytest-cov
 anyio
 requests
-# pip install -r requirements.txt 
-# tree  -I 'venv|staticfiles' --prune

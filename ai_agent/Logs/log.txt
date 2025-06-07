@@ -130,3 +130,45 @@ KeyError: 'ATOMIC_REQUESTS'
 [2025-06-06 03:03:49,409] ERROR django.request Internal Server Error: /api/agent/respond/
 [2025-06-06 03:03:49,424] ERROR django.request Internal Server Error: /api/agent/respond/
 [2025-06-06 03:03:49,439] ERROR django.request Internal Server Error: /api/agent/respond/
+[2025-06-07 20:35:50,775] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:36:19,228] INFO django.server "POST /api/agent/memory/ HTTP/1.1" 200 16
+[2025-06-07 20:36:25,725] INFO django.server "GET /api/agent/memory/?agent=summarize&key=last_summary HTTP/1.1" 200 81
+[2025-06-07 20:37:40,962] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:37:43,519] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/agent/urls.py changed, reloading.
+[2025-06-07 20:37:43,767] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:37:51,578] INFO django.server "GET /api/agent/memory/list/?agent=summarize HTTP/1.1" 200 147
+[2025-06-07 20:37:56,547] INFO django.server "POST /api/agent/memory/delete/ HTTP/1.1" 200 21
+[2025-06-07 20:38:00,025] INFO django.server "GET /api/agent/memory/list/?agent=summarize HTTP/1.1" 200 38
+[2025-06-07 20:40:14,620] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:40:16,868] INFO django.server "POST /api/agent/respond/ HTTP/1.1" 200 41
+[2025-06-07 20:40:22,834] INFO django.server "POST /api/agent/respond/ HTTP/1.1" 200 34
+[2025-06-07 20:40:27,112] INFO django.server "POST /api/agent/respond/ HTTP/1.1" 200 42
+[2025-06-07 20:40:33,718] INFO django.server "POST /api/agent/respond/ HTTP/1.1" 200 46
+[2025-06-07 20:40:38,409] INFO django.server "POST /api/agent/respond/ HTTP/1.1" 200 29
+[2025-06-07 20:42:22,071] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/agent/agent_manager.py changed, reloading.
+[2025-06-07 20:42:22,427] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:42:33,099] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/agent/agent_manager.py changed, reloading.
+[2025-06-07 20:42:33,418] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:42:34,925] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/core_services/agents/qa.py changed, reloading.
+[2025-06-07 20:42:35,150] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:44:08,657] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/core_services/agents/qa.py changed, reloading.
+[2025-06-07 20:44:09,033] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:44:14,617] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/agent/agent_manager.py changed, reloading.
+[2025-06-07 20:44:15,031] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:44:23,685] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/core_services/agents/qa.py changed, reloading.
+[2025-06-07 20:44:24,018] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:44:29,850] INFO django.server "POST /api/agent/respond/ HTTP/1.1" 200 52
+[2025-06-07 20:44:45,283] INFO django.server "POST /api/agent/respond/ HTTP/1.1" 200 367
+[2025-06-07 20:45:44,238] INFO django.server "POST /api/agent/respond/ HTTP/1.1" 200 64
+[2025-06-07 20:46:05,989] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/agent/agent_manager.py changed, reloading.
+[2025-06-07 20:46:06,357] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:46:12,959] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/agent/agent_manager.py changed, reloading.
+[2025-06-07 20:46:13,281] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:46:21,637] INFO django.server "POST /api/agent/respond/ HTTP/1.1" 200 367
+[2025-06-07 20:50:17,338] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/agent/agent_manager.py changed, reloading.
+[2025-06-07 20:50:17,698] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:50:25,322] INFO django.utils.autoreload /Users/kiarash/Desktop/project/git/ai-platform/ai_agent/agent/agent_manager.py changed, reloading.
+[2025-06-07 20:50:25,696] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:51:23,032] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:51:58,367] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-06-07 20:53:57,716] INFO django.utils.autoreload Watching for file changes with StatReloader

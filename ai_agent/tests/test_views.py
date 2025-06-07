@@ -8,53 +8,50 @@ from agent.agent_manager import AgentRouter
 def client():
     return Client()
 
-@pytest.fixture
-def router():
-    echo_agent = MagicMock()
-    echo_agent.handle.return_value = "Echoed"
-    summarizer_agent = MagicMock()
-    summarizer_agent.handle.return_value = "Summarized"
-
-    router = AgentRouter()
-    router.agents = {
-        "echo": echo_agent,
-        "summarize": summarizer_agent,
-    }
-    router.routing_rules = [
-        (["summarize", "summary"], summarizer_agent),
-    ]
-    return router, echo_agent, summarizer_agent
-
 @pytest.mark.django_db
-@patch('agent.agent_manager.AgentLog.objects.create')
-def test_agent_router_routes_correctly(mock_log_create, router):
-    router_instance, echo_agent, summarizer_agent = router
+@patch('core_services.agents.summarize.openai.chat.completions.create')
+@patch('core_services.agents.qa.openai.chat.completions.create')
+@patch('core_services.agents.email.openai.chat.completions.create')
+@patch('core_services.agents.excel.openai.chat.completions.create')
+def test_agent_respond_view(mock_excel, mock_email, mock_qa, mock_summarize, client):
+    mock_excel.return_value = MagicMock(choices=[MagicMock(message={'content': 'Excel result'})])
+    mock_email.return_value = MagicMock(choices=[MagicMock(message={'content': 'Email result'})])
+    mock_qa.return_value = MagicMock(choices=[MagicMock(message={'content': 'QA result'})])
+    mock_summarize.return_value = MagicMock(choices=[MagicMock(message={'content': 'Summary result'})])
 
-    # Test summarizer route
-    res = router_instance.route("Please summarize this text")
-    summarizer_agent.handle.assert_called_once_with("Please summarize this text")
-    assert res == "Summarized"
-    mock_log_create.assert_called()
-
-    # Test fallback echo route
-    res = router_instance.route("Hello world")
-    echo_agent.handle.assert_called_once_with("Hello world")
-    assert res == "Echoed"
-    mock_log_create.assert_called()
+    # Excel
+    res = client.post('/api/agent/respond/', data=json.dumps({'prompt': 'suggest formula to sum column A'}), content_type='application/json')
+    assert res.status_code == 200
+    assert "ExcelAgent:" in res.json()['response']
+    # Email
+    res = client.post('/api/agent/respond/', data=json.dumps({'prompt': 'suggest reply to this email: ...'}), content_type='application/json')
+    assert res.status_code == 200
+    assert "EmailAgent:" in res.json()['response']
+    # Summarize
+    res = client.post('/api/agent/respond/', data=json.dumps({'prompt': 'summarize this text'}), content_type='application/json')
+    assert res.status_code == 200
+    assert "Summary:" in res.json()['response']
+    # QA
+    res = client.post('/api/agent/respond/', data=json.dumps({'prompt': 'What is the capital of France?'}), content_type='application/json')
+    assert res.status_code == 200
+    assert "Answer:" in res.json()['response']
 
 @pytest.mark.parametrize("prompt, expected_start", [
-    ("Hello", "Echo:"),
-    ("Can you summarize this text?", "Summary:")
+    ("What is the capital of France?", "Answer:"),
+    ("summarize this text", "Summary:"),
+    ("suggest reply to this email: ...", "EmailAgent:"),
+    ("suggest formula to sum column A", "ExcelAgent:")
 ])
 @pytest.mark.django_db
 @patch('core_services.agents.summarize.openai.chat.completions.create')
-@patch('agent.agent_manager.AgentLog.objects.create')
-def test_agent_response(mock_log_create, mock_chat_create, client, prompt, expected_start):
-    # Mock OpenAI response for summarizer
-    mock_response = MagicMock()
-    mock_response.choices = [MagicMock(message={'content': 'This is a mocked summary.'})]
-    mock_chat_create.return_value = mock_response
-    mock_log_create.return_value = None
+@patch('core_services.agents.qa.openai.chat.completions.create')
+@patch('core_services.agents.email.openai.chat.completions.create')
+@patch('core_services.agents.excel.openai.chat.completions.create')
+def test_agent_response(mock_excel, mock_email, mock_qa, mock_summarize, client, prompt, expected_start):
+    mock_excel.return_value = MagicMock(choices=[MagicMock(message={'content': 'Excel result'})])
+    mock_email.return_value = MagicMock(choices=[MagicMock(message={'content': 'Email result'})])
+    mock_qa.return_value = MagicMock(choices=[MagicMock(message={'content': 'QA result'})])
+    mock_summarize.return_value = MagicMock(choices=[MagicMock(message={'content': 'Summary result'})])
 
     res = client.post(
         '/api/agent/respond/',
@@ -63,22 +60,3 @@ def test_agent_response(mock_log_create, mock_chat_create, client, prompt, expec
     )
     assert res.status_code == 200
     assert res.json()['response'].startswith(expected_start)
-
-@pytest.mark.django_db
-@patch('core_services.agents.summarize.openai.chat.completions.create')
-@patch('agent.agent_manager.AgentLog.objects.create')
-def test_agent_summarizer_response(mock_log_create, mock_chat_create, client):
-    # Mock OpenAI response
-    mock_response = MagicMock()
-    mock_response.choices = [MagicMock(message={'content': 'This is a mocked summary.'})]
-    mock_chat_create.return_value = mock_response
-    mock_log_create.return_value = None
-
-    res = client.post(
-        '/api/agent/respond/',
-        data=json.dumps({'prompt': 'Can you summarize this text?'}),
-        content_type='application/json'
-    )
-    assert res.status_code == 200
-    assert "Summary:" in res.json()['response']
-    assert "mocked summary" in res.json()['response'].lower()

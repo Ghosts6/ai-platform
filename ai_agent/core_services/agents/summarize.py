@@ -5,14 +5,15 @@ import os
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class SummarizerAgent(AgentBase):
-    def __init__(self, name: str, client=None):
+    def __init__(self, name: str, client=None, memory_backend=None):
         super().__init__(name)
-        # Use the new OpenAI API endpoint
         self.client = client or openai.chat.completions
+        self.memory_backend = memory_backend
 
     def handle(self, prompt: str, summary_length: str = "medium") -> str:
         """
         Handles summarization. Optionally accepts summary_length: 'short', 'medium', 'long'.
+        Remembers last summary in memory if memory_backend is set.
         """
         try:
             system_prompt = "You are a helpful summarizer."
@@ -26,12 +27,13 @@ class SummarizerAgent(AgentBase):
                 ],
                 temperature=0.5,
             )
-            # Support both dict and object for test mocks
             choice = response.choices[0]
             if hasattr(choice, "message"):
                 summary = choice.message['content']
             else:
                 summary = choice['message']['content']
+            if self.memory_backend:
+                self.memory_backend(self.name, "last_summary", summary)
             return f"Summary: {summary}"
         except Exception as e:
             return f"Error: unable to summarize the text. {str(e)}"
