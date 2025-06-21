@@ -20,6 +20,12 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 TEST_MODE = os.getenv("TEST_MODE", "False").lower() == "true"
 
+# Microsoft Graph API credentials
+MS_CLIENT_ID = os.getenv("MS_CLIENT_ID")
+MS_CLIENT_SECRET = os.getenv("MS_CLIENT_SECRET")
+MS_TENANT_ID = os.getenv("MS_TENANT_ID")
+MS_REDIRECT_URI = os.getenv("MS_REDIRECT_URI")
+
 # security settings
 # # **Content Security Policy (CSP)**
 # CSP_DEFAULT_SRC = ["'self'"]  
