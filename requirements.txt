@@ -13,3 +13,4 @@ pytest-django
 pytest-cov
 anyio
 requests
+O365

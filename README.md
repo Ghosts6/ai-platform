@@ -93,3 +93,67 @@ pytest
 
 Tests will also be executed automatically via GitHub Actions on push and pull request events.
 
+---
+
+# ────────────────
+# AI Agents Overview & Setup
+# ────────────────
+
+## Available Agents
+
+- **SummarizerAgent**: Summarizes text using OpenAI. No extra setup needed.
+- **QAPairAgent**: Answers questions and stores Q&A pairs using OpenAI. No extra setup needed.
+- **EmailAgent**: Summarizes, drafts, and analyzes emails using OpenAI. No extra setup needed.
+- **ExcelAgent**: Suggests formulas, summarizes, and analyzes spreadsheet data using OpenAI. No extra setup needed.
+- **TeamsAgent**: Connects to Microsoft Teams/Outlook, listens for events (e.g., maintenance, survey, test running), and creates calendar events automatically. Requires Microsoft Azure app registration and O365 setup (see below).
+
+## How to Set Up Each Agent
+
+### 1. SummarizerAgent, QAPairAgent, EmailAgent, ExcelAgent
+- **Requirement:** OpenAI API key in `.env` as `OPENAI_API_KEY`.
+- **Usage:** Accessible via `/api/agent/respond/` endpoint. Just send a prompt.
+
+### 2. TeamsAgent (Microsoft Teams/Calendar Integration)
+- **Requirements:**
+  - Register an app in Azure Portal (Azure Active Directory > App registrations).
+  - Add the following to your `.env`:
+    - `MS_CLIENT_ID`
+    - `MS_CLIENT_SECRET`
+    - `MS_TENANT_ID`
+    - `MS_REDIRECT_URI` (e.g., `http://localhost:8000/msauth/callback/`)
+  - Install Python package: `pip install O365`
+- **First Run:**
+  - On first use, you will be prompted to authenticate in a browser. This will save a token file for future use.
+- **Usage:**
+  - Send a prompt containing keywords like "maintenance", "survey", or "test running" to `/api/agent/respond/`.
+  - The agent will create a calendar event in your default Teams/Outlook calendar.
+
+## Example .env File
+
+```env
+# Django & Database
+DJANGO_SECRET_KEY=your-django-secret
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+DATABASE_NAME=your_db
+DATABASE_USER=your_user
+DATABASE_PASSWORD=your_password
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+
+# OpenAI
+OPENAI_API_KEY=your-openai-key
+
+# Celery/Redis
+CELERY_BROKER_URL=redis://localhost:6379/0
+
+# Microsoft Teams/Graph API
+MS_CLIENT_ID=your-client-id
+MS_CLIENT_SECRET=your-client-secret
+MS_TENANT_ID=your-tenant-id
+MS_REDIRECT_URI=http://localhost:8000/msauth/callback/
+
+# Test Mode
+TEST_MODE=True
+```
+
