@@ -35,6 +35,11 @@ MS_REDIRECT_URI = os.getenv("MS_REDIRECT_URI")
 # CSP_CONNECT_SRC = ["'self'"]  
 # SECURE_REFERRER_POLICY = 'same-origin'
 
+# CROSS config
+CORS_ALLOWED_ORIGINS = [
+       "http://localhost:5173",  # Vite development server
+]
+
 # Installed apps
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -47,10 +52,12 @@ INSTALLED_APPS = [
     "core_services",
     "scheduler",
     "shared_utils",
+    'corsheaders',
 ]
 
 # Middleware
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # for CORS support
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # for static file serving
     "django.contrib.sessions.middleware.SessionMiddleware",

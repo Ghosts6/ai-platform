@@ -14,3 +14,4 @@ pytest-cov
 anyio
 requests
 O365
+django-cors-headers
