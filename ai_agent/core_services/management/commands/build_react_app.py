@@ -1,16 +1,14 @@
 import os
 import subprocess
-import shutil
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 
 class Command(BaseCommand):
-    help = 'Builds React app, copies build files to Django static directory, and runs collectstatic.'
+    help = 'Builds React app and runs collectstatic.'
 
     def handle(self, *args, **kwargs):
         # Project root: ai_agent/..
         project_root_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../..'))
-        
         frontend_dir = os.path.join(project_root_dir, 'frontend')
         if not os.path.isdir(frontend_dir):
             self.stdout.write(self.style.ERROR(f"Frontend directory not found at {frontend_dir}"))
@@ -22,30 +20,6 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('React app built successfully.'))
         except subprocess.CalledProcessError as e:
             self.stdout.write(self.style.ERROR(f"Error occurred while building React app: {e}"))
-            return
-
-        build_dir = os.path.join(frontend_dir, 'build')
-        # Target: backend_core/Static/frontend
-        static_frontend_dir = os.path.join(project_root_dir, 'ai_agent', 'backend_core', 'Static', 'frontend')
-
-        if not os.path.isdir(build_dir):
-            self.stdout.write(self.style.ERROR(f"Build directory not found at {build_dir}"))
-            return
-
-        self.stdout.write(self.style.WARNING('Cleaning old frontend static files...'))
-        try:
-            if os.path.exists(static_frontend_dir):
-                shutil.rmtree(static_frontend_dir)
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"Error occurred while cleaning old static files: {e}"))
-            return
-
-        self.stdout.write(self.style.WARNING('Copying build files to Django static directory...'))
-        try:
-            shutil.copytree(build_dir, static_frontend_dir)
-            self.stdout.write(self.style.SUCCESS('Build files copied successfully.'))
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"Error occurred while copying build files: {e}"))
             return
 
         self.stdout.write(self.style.WARNING('Running collectstatic...'))

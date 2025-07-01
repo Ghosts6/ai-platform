@@ -58,6 +58,31 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Animations and custom effects for landing page */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 1.2s;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 #00c6ff44; }
+  70% { box-shadow: 0 0 0 20px #00c6ff00; }
+  100% { box-shadow: 0 0 0 0 #00c6ff44; }
+}
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+.glow {
+  box-shadow: 0 0 30px 10px #00c6ff44;
+}
+.glow:hover {
+  box-shadow: 0 0 60px 20px #00c6ff99;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

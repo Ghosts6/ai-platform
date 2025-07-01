@@ -4,6 +4,7 @@ import dj_database_url
 from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from pathlib import Path
+import sys
 
 # Base directory & dotenv setup
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,8 +38,13 @@ MS_REDIRECT_URI = os.getenv("MS_REDIRECT_URI")
 
 # CROSS config
 CORS_ALLOWED_ORIGINS = [
-       "http://localhost:5173",  # Vite development server
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
 ]
+
+CORS_ALLOW_CREDENTIALS = True
 
 # Installed apps
 INSTALLED_APPS = [
@@ -72,11 +78,59 @@ MIDDLEWARE = [
 ROOT_URLCONF = "backend_core.urls"
 WSGI_APPLICATION = "backend_core.wsgi.application"
 
+# Media & Static files
+
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [
+    BASE_DIR / '..' / 'frontend' / 'dist',
+    BASE_DIR / 'backend_core' / 'Static',
+]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Configure WhiteNoise for static files
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
+# Add MIME type configuration
+WHITENOISE_MIMETYPES = {
+    '.css': 'text/css',
+    '.js': 'application/javascript',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.woff': 'application/font-woff',
+    '.woff2': 'application/font-woff2',
+    '.ttf': 'application/font-ttf',
+    '.eot': 'application/vnd.ms-fontobject',
+    '.otf': 'application/font-otf',
+}
+
+# WhiteNoise configuration
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
+WHITENOISE_ROOT = STATIC_ROOT
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'backend_core/Media'
+
 # Templates
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'backend_core' /  "Templates"],  # Your custom template directory
+        "DIRS": [
+            os.path.join(BASE_DIR, '../frontend/dist'),
+            os.path.join(BASE_DIR, 'backend_core/Templates'),
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -122,14 +176,6 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Static files setup
-STATIC_URL = "/static/"
-STATICFILES_DIRS = [
-    BASE_DIR / 'backend_core' / 'Static',
-]
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -141,30 +187,55 @@ LOG_DIR = BASE_DIR / "Logs"
 LOG_DIR.mkdir(exist_ok=True)
 
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "file": {
-            "level": "INFO",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": str(LOG_DIR / "log.txt"),
-            "maxBytes": 1024 * 1024 * 5,  # 5 MB
-            "backupCount": 2,
-            "formatter": "verbose",
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] [{levelname}] [{name}:{lineno}] {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         },
     },
-    "formatters": {
-        "verbose": {
-            "format": "[{asctime}] {levelname} {name} {message}",
-            "style": "{",
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOG_DIR / 'log.txt'),
+            'formatter': 'verbose',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'delay': True,  # Delay file creation until first write
+        },
+        'console': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'stream': sys.stdout,
+        },
+        'null': {
+            'class': 'logging.NullHandler',
         },
     },
-    "loggers": {
-        "django": {
-            "handlers": ["file"],
-            "level": "INFO",
-            "propagate": True,
+    'loggers': {
+        'django.request': {
+            'handlers': ['file', 'console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
         },
     },
 }
+
+# Suppress 404/403/400 warnings during tests and development
+if 'test' in sys.argv[0] or 'pytest' in sys.argv[0]:
+    # During tests, use only console handler
+    LOGGING['loggers']['django.request']['handlers'] = ['console']
+    LOGGING['loggers']['django.request']['level'] = 'CRITICAL'
+    # Disable file logging during tests by removing the file handler
+    if 'file' in LOGGING['handlers']:
+        del LOGGING['handlers']['file']
 

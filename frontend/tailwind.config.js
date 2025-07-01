@@ -1,8 +1,10 @@
 export default {
      content: [
-       "./index.html",
-       "./src/**/*.{js,ts,jsx,tsx}",
+      './public/index.html',
+      './src/**/*.{html,js,jsx,css}',
+      '../ai_agent/backend_core/Templates/**/*.html ',
      ],
+     darkMode: 'class',
      theme: {
        extend: {},
      },
