@@ -7,7 +7,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background text-accent font-body">
       <Header />
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 md:py-24">
-        <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
+        <div className="flex flex-col items-center gap-6 w-full">
           <FaCrown className="text-primary text-6xl mb-2 drop-shadow-lg" />
           <h1 className="text-5xl md:text-7xl font-display font-extrabold text-primary mb-2 tracking-tight text-center">
             AIAgent Platform
@@ -17,12 +17,12 @@ export default function Home() {
             by OpenAI and Django.
             <br />
             <span className="text-primary font-semibold">
-              Fast. Modern. Extensible. Royal.
+              Fast. Modern. Extensible.
             </span>
           </p>
           <a
             href="/agent"
-            className="inline-block px-8 py-3 rounded-lg bg-primary text-background font-bold text-lg shadow-lg hover:bg-primary-dark transition"
+            className="inline-block px-8 py-3 rounded-lg bg-primary text-background font-bold text-lg shadow-lg hover:bg-primary-hover transition"
           >
             Explore Agents
           </a>
@@ -30,7 +30,7 @@ export default function Home() {
             Need help?{' '}
             <a
               href="mailto:contact@aiagent.com"
-              className="text-primary underline hover:text-primary-dark"
+              className="text-primary underline hover:text-primary-hover"
             >
               Contact us
             </a>

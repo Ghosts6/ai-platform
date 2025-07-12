@@ -24,9 +24,9 @@ urlpatterns = [
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     # static files config
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
+    path('README.md', views.ReadmeView.as_view(), name='readme_file'),
     # catch all react patterns - must be last
     re_path(r'^.*$', home_views.index, name='home'),
-    path('README.md', views.ReadmeView.as_view(), name='readme_file'),
 ]
 
 # Serve static files in development

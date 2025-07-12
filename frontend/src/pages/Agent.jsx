@@ -8,21 +8,31 @@ export default function Agent() {
     <div className="flex flex-col min-h-screen bg-background text-accent font-body">
       <Header />
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 md:py-24 w-full">
-        <div className="flex flex-col items-center gap-6 max-w-xl w-full bg-white/90 rounded-xl shadow-xl p-8 animate-fadeIn">
-          <h1 className="text-4xl md:text-5xl font-display font-extrabold text-primary mb-2 tracking-tight text-center flex items-center gap-2">
-            <FaRobot className="text-gold animate-bounce" /> Agent Management
-          </h1>
-          <p className="text-lg text-accent/80 text-center mb-4">
-            Manage your AI agents, view their status, and configure new workflows.
-          </p>
-          <div className="flex flex-col gap-4 w-full">
-            <div className="flex items-center gap-3 text-lg group">
-              <FaUserSecret className="text-gold group-hover:scale-110 transition-transform duration-200" />
-              <span className="font-semibold group-hover:text-gold transition-colors">Create New Agent</span>
+        <div className="w-full max-w-4xl mx-auto bg-surface rounded-2xl shadow-2xl p-8 animate-fadeIn">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-display font-extrabold text-primary mb-2 tracking-tight flex items-center justify-center gap-3">
+              <FaRobot className="text-primary animate-bounce" /> Agent Management
+            </h1>
+            <p className="text-lg text-accent/80">
+              Manage your AI agents, view their status, and configure new workflows.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-background p-6 rounded-lg shadow-lg hover:shadow-primary/50 transition-shadow duration-300">
+              <div className="flex items-center gap-4 mb-4">
+                <FaUserSecret className="text-primary text-3xl" />
+                <h2 className="text-2xl font-bold">Create New Agent</h2>
+              </div>
+              <p className="text-accent/80">Create a new agent from scratch and define its personality and capabilities.</p>
+              <button className="mt-4 w-full">Create Agent</button>
             </div>
-            <div className="flex items-center gap-3 text-lg group">
-              <FaCogs className="text-gold group-hover:rotate-12 transition-transform duration-200" />
-              <span className="font-semibold group-hover:text-gold transition-colors">Configure Workflows</span>
+            <div className="bg-background p-6 rounded-lg shadow-lg hover:shadow-primary/50 transition-shadow duration-300">
+              <div className="flex items-center gap-4 mb-4">
+                <FaCogs className="text-primary text-3xl" />
+                <h2 className="text-2xl font-bold">Configure Workflows</h2>
+              </div>
+              <p className="text-accent/80">Define complex workflows and connect multiple agents to automate tasks.</p>
+              <button className="mt-4 w-full">Configure</button>
             </div>
           </div>
         </div>

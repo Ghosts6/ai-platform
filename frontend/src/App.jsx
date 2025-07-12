@@ -6,7 +6,7 @@ import NotFound from './pages/NotFound';
 import Error500 from './pages/Error500';
 import Readme from './pages/Readme';
 import Contact from './pages/Contact';
-import './App.css';
+
 
 function App() {
   return (

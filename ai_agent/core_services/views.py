@@ -1,4 +1,17 @@
-from django.http import HttpResponse
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .serializers import ContactMessageSerializer
 
-def index(request):
-    return HttpResponse("Hello from [app_name]!")
+@api_view(['POST'])
+def contact_message(request):
+    if request.method == 'POST':
+        # Honeypot check
+        if request.data.get('website'):
+            return Response(status=status.HTTP_200_OK) # Pretend it's all good
+
+        serializer = ContactMessageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Your message has been sent successfully!'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

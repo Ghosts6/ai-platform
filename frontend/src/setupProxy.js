@@ -1,13 +1,11 @@
-// Proxy README.md requests to the root README.md file
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function(app) {
   app.use(
-    '/README.md',
+    '/api',
     createProxyMiddleware({
-      target: 'http://localhost:8000', // Django dev server
+      target: 'http://127.0.0.1:8000',
       changeOrigin: true,
-      pathRewrite: { '^/README.md': '/README.md' },
     })
   );
 };

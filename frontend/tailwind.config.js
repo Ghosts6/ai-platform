@@ -1,4 +1,6 @@
-export default {
+const plugin = require('tailwindcss/plugin');
+
+module.exports = {
   content: [
     './public/index.html',
     './src/**/*.{html,js,jsx,css}',
@@ -9,27 +11,50 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          DEFAULT: '#FFD700', // Gold
-          dark: '#B8860B',   // Dark gold
-          light: '#FFF8DC',  // Light gold
-          hover: '#FFC300',
-        },
-        background: '#18181b', // Black
-        surface: '#23232b',    // Slightly lighter black
-        accent: '#fff',        // White
-        error: '#ef4444',
-        warning: '#facc15',
-        info: '#0ea5e9',
-        success: '#22c55e',
-        royal: '#1a1a2e',      // Royal blue-black
-        royalGold: '#FFD700',  // Royal gold
+        'primary': '#00ADB5',
+        'secondary': '#393E46',
+        'background': '#222831',
+        'surface': '#393E46',
+        'accent': '#EEEEEE',
+        'primary-hover': '#00c5cf',
+        'secondary-hover': '#4a5058',
       },
       fontFamily: {
         display: ['Poppins', 'ui-sans-serif', 'system-ui'],
         body: ['Inter', 'ui-sans-serif', 'system-ui'],
       },
+      keyframes: {
+        typing: {
+          '0%': { width: '0' },
+          '100%': { width: '100%' },
+        },
+        blink: {
+          '50%': { borderColor: 'transparent' },
+        },
+      },
+      animation: {
+        typing: 'typing 2s steps(20, end), blink .75s step-end infinite',
+      },
     },
   },
-  plugins: [require('@tailwindcss/typography')],
+  plugins: [
+    require('@tailwindcss/typography'),
+    plugin(function({ addBase, theme }) {
+      addBase({
+        'body': {
+          '&::-webkit-scrollbar': {
+            width: '12px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: theme('colors.surface'),
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: theme('colors.primary'),
+            borderRadius: '20px',
+            border: `3px solid ${'colors.surface'}`,
+          },
+        },
+      });
+    }),
+  ],
 };

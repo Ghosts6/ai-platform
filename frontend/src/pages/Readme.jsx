@@ -32,12 +32,14 @@ export default function ReadmePage() {
     <div className="flex flex-col min-h-screen bg-background text-accent font-body">
       <Header />
       <main className="flex-1 flex flex-col items-center px-4 py-12 md:py-20 w-full">
-        <div className="flex flex-col items-center gap-4 max-w-3xl w-full bg-white/90 rounded-xl shadow-xl p-8 relative overflow-hidden">
-          <FaBookOpen className="absolute top-4 right-4 text-gold text-4xl opacity-30 pointer-events-none" />
-          <h1 className="text-4xl md:text-5xl font-display font-extrabold text-primary mb-4 tracking-tight text-center flex items-center gap-2">
-            <FaCrown className="text-gold drop-shadow" /> README
-          </h1>
-          <article className="prose prose-lg max-w-none w-full text-black/90 bg-white/80 rounded-lg p-4 shadow-inner backdrop-blur-md code-enhanced">
+        <div className="flex flex-col items-center gap-4 w-full bg-surface rounded-xl shadow-xl p-8 relative overflow-hidden">
+          <FaBookOpen className="absolute top-4 right-4 text-primary text-4xl opacity-30 pointer-events-none" />
+          <div className="overflow-hidden">
+            <h1 className="text-4xl md:text-5xl font-display font-extrabold text-primary mb-4 tracking-tight text-center flex items-center gap-2 animate-typing overflow-hidden whitespace-nowrap">
+              <FaCrown className="text-primary drop-shadow" /> README
+            </h1>
+          </div>
+          <article className="prose prose-lg max-w-none w-full text-accent bg-background rounded-lg p-4 shadow-inner backdrop-blur-md code-enhanced">
             {loading && <div className="text-center text-accent/60">Loading README...</div>}
             {error && <div className="text-center text-red-600">{error}</div>}
             {!loading && !error && <MarkdownRenderer>{readme}</MarkdownRenderer>}
@@ -57,6 +59,3 @@ function MarkdownRenderer({ children }) {
     />
   );
 }
-
-// Add to tailwind.config.js for prose/code styling if not present:
-//   require('@tailwindcss/typography'),
