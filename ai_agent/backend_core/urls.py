@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 from backend_core import views as home_views
 from django.views.generic import TemplateView
 from . import views 
+from django.shortcuts import render
 
 
 urlpatterns = [
@@ -16,12 +17,16 @@ urlpatterns = [
     path('utils/', include('shared_utils.urls')),
     path('', views.index, name='home_index'),
 
-        # media config
+    # Error handling
+    path('custom-404/', views.custom_404, name='custom_404'),
+    path('custom-500/', views.custom_500, name='custom_500'),
+    # media config
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     # static files config
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     # catch all react patterns - must be last
     re_path(r'^.*$', home_views.index, name='home'),
+    path('README.md', views.ReadmeView.as_view(), name='readme_file'),
 ]
 
 # Serve static files in development
@@ -35,3 +40,7 @@ if not settings.DEBUG:
         path('', TemplateView.as_view(template_name='index.html')),
         path('<path:path>', TemplateView.as_view(template_name='index.html')),
     ]
+
+# Custom error handlers
+handler404 = 'django.views.defaults.page_not_found'
+handler500 = 'django.views.defaults.server_error'

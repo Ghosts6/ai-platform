@@ -1,8 +1,22 @@
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import { FaCrown } from 'react-icons/fa';
+
 export default function Error500() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-      <h1 className="text-5xl font-bold text-yellow-600 mb-4">500</h1>
-      <p className="text-lg text-gray-700 dark:text-gray-200">Internal Server Error</p>
+    <div className="flex flex-col min-h-screen bg-background text-accent font-body">
+      <Header />
+      <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
+        <FaCrown className="text-warning text-5xl mb-4 drop-shadow-lg" />
+        <h1 className="text-6xl font-extrabold text-warning mb-2">500</h1>
+        <h2 className="text-2xl font-semibold mb-4">Internal Server Error</h2>
+        <p className="text-lg text-accent/80 mb-6 max-w-lg text-center">
+          Sorry, something went wrong on our end.<br />
+          If the problem persists, please <a href="mailto:contact@aiagent.com" className="text-primary underline hover:text-primary-dark">contact us</a>.
+        </p>
+        <a href="/" className="inline-block px-6 py-2 rounded-lg bg-primary text-background font-semibold shadow hover:bg-primary-dark transition">Go Home</a>
+      </main>
+      <Footer />
     </div>
   );
 }

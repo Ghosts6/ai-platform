@@ -1,0 +1,23 @@
+.box {
+  text-align: center;
+  padding: 2rem 3rem;
+  border-radius: 1rem;
+  background: #23272f;
+  box-shadow: 0 4px 32px #0002;
+}
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #1a202c;
+  color: #fff;
+  font-family: sans-serif;
+}
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+p {
+  font-size: 1.2rem;
+}

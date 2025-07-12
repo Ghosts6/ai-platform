@@ -2,18 +2,36 @@ import os
 import subprocess
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
+import shutil
 
 class Command(BaseCommand):
-    help = 'Builds React app and runs collectstatic.'
+    help = 'Builds React app, cleans old static files, and runs collectstatic.'
 
     def handle(self, *args, **kwargs):
         # Project root: ai_agent/..
         project_root_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../..'))
         frontend_dir = os.path.join(project_root_dir, 'frontend')
-        if not os.path.isdir(frontend_dir):
-            self.stdout.write(self.style.ERROR(f"Frontend directory not found at {frontend_dir}"))
+        staticfiles_dir = os.path.join(project_root_dir, 'ai_agent', 'staticfiles')
+        dist_dir = os.path.join(frontend_dir, 'dist')
+
+        # Clean old static files
+        self.stdout.write(self.style.WARNING('Cleaning old static files...'))
+        try:
+            if os.path.exists(staticfiles_dir):
+                shutil.rmtree(staticfiles_dir)
+                self.stdout.write(self.style.SUCCESS('Old staticfiles directory removed.'))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"Error occurred while cleaning staticfiles: {e}"))
+            return
+        try:
+            if os.path.exists(dist_dir):
+                shutil.rmtree(dist_dir)
+                self.stdout.write(self.style.SUCCESS('Old React dist directory removed.'))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"Error occurred while cleaning dist: {e}"))
             return
 
+        # Build React app
         self.stdout.write(self.style.WARNING('Building React app...'))
         try:
             subprocess.run(['npm', 'run', 'build'], cwd=frontend_dir, check=True)
@@ -22,6 +40,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"Error occurred while building React app: {e}"))
             return
 
+        # Run collectstatic
         self.stdout.write(self.style.WARNING('Running collectstatic...'))
         try:
             call_command('collectstatic', '--noinput')

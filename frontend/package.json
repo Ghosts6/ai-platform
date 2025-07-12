@@ -4,15 +4,18 @@
   "version": "0.0.0",
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "react-app-rewired build && tailwindcss -i ./src/index.css -o ./dist/css/main.css",
+    "build": "react-app-rewired build && tailwindcss -i ./src/index.css -o ./dist/css/main.css && tailwindcss -i ../ai_agent/backend_core/Static/css/django-tailwind.css -o ../ai_agent/backend_core/Static/css/django-tailwind.generated.css --minify",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "build:css": "tailwindcss -i ./src/index.css -o ./dist/css/main.css --watch"
   },
   "dependencies": {
+    "@tailwindcss/typography": "^0.5.16",
     "axios": "^1.6.7",
     "bootstrap": "^5.3.3",
     "gsap": "^3.12.5",
+    "highlight.js": "^11.11.1",
+    "marked": "^16.0.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.1",
     "react-dom": "^18.2.0",

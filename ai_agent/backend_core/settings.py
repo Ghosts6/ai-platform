@@ -15,6 +15,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
 IS_TESTING = os.getenv("TEST_MODE", "False") == "True"
+MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "False").lower() == "true"
 
 # External Services
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -66,6 +67,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",  # for CORS support
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # for static file serving
+    "ai_agent.backend_core.middleware.MaintenanceModeMiddleware",  # maintenance mode
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
