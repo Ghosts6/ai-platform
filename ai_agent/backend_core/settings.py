@@ -59,8 +59,33 @@ INSTALLED_APPS = [
     "core_services",
     "scheduler",
     "shared_utils",
-    'corsheaders',
+    "profiles",
+    "corsheaders",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "django_rest_passwordreset",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
+    "CLASS": "django_rest_passwordreset.tokens.RandomStringTokenGenerator",
+    "OPTIONS": {
+        "min_length": 20,
+        "max_length": 30
+    }
+}
+
+DJANGO_REST_PASSWORDRESET = {
+    'PASSWORD_RESET_URL': '/password-reset-confirm'
+}
+
 
 # Middleware
 MIDDLEWARE = [

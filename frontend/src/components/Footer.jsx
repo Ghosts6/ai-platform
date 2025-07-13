@@ -10,7 +10,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center gap-2 text-sm">
           <span>Contact: <a href="mailto:contact@aiagent.com" className="underline hover:text-primary transition">contact@aiagent.com</a></span>
           <span className="hidden md:inline">|</span>
-          <span>GitHub: <a href="https://github.com/Ghosts6/Local-website" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary transition">AIAgent Repo</a></span>
+          <span>GitHub: <a href="https://github.com/Ghosts6/ai-platform" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary transition">AIAgent Repo</a></span>
         </div>
       </div>
     </footer>

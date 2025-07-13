@@ -6,7 +6,7 @@ source venv/bin/activate
 # Build the React application
 # The --prefix flag tells npm where to find the package.json
 echo "Building React app..."
-npm run build --prefix frontend
+python3 ai_agent/manage.py build_react_app
 
 # Start Django development server in the background
 echo "Starting Django server..."

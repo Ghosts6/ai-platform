@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { FaUserSecret, FaRobot, FaCogs } from 'react-icons/fa';
+import { FaRobot, FaComments, FaHistory, FaListAlt } from 'react-icons/fa';
 
 export default function Agent() {
   return (
@@ -14,25 +15,35 @@ export default function Agent() {
               <FaRobot className="text-primary animate-bounce" /> Agent Management
             </h1>
             <p className="text-lg text-accent/80">
-              Manage your AI agents, view their status, and configure new workflows.
+              Start a new chat, continue a previous conversation, or view all your past chats.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-background p-6 rounded-lg shadow-lg hover:shadow-primary/50 transition-shadow duration-300">
               <div className="flex items-center gap-4 mb-4">
-                <FaUserSecret className="text-primary text-3xl" />
-                <h2 className="text-2xl font-bold">Create New Agent</h2>
+                <FaComments className="text-primary text-3xl" />
+                <h2 className="text-2xl font-bold">Start Chat</h2>
               </div>
-              <p className="text-accent/80">Create a new agent from scratch and define its personality and capabilities.</p>
-              <button className="mt-4 w-full">Create Agent</button>
+              <p className="text-accent/80">Start a new conversation with an AI agent to get assistance.</p>
+              <Link to="/chat" className="mt-4 w-full">
+                <button className="w-full bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/80 transition-colors duration-300">Start New Chat</button>
+              </Link>
             </div>
             <div className="bg-background p-6 rounded-lg shadow-lg hover:shadow-primary/50 transition-shadow duration-300">
               <div className="flex items-center gap-4 mb-4">
-                <FaCogs className="text-primary text-3xl" />
-                <h2 className="text-2xl font-bold">Configure Workflows</h2>
+                <FaHistory className="text-primary text-3xl" />
+                <h2 className="text-2xl font-bold">Continue Chat</h2>
               </div>
-              <p className="text-accent/80">Define complex workflows and connect multiple agents to automate tasks.</p>
-              <button className="mt-4 w-full">Configure</button>
+              <p className="text-accent/80">Resume a previous conversation from your chat history.</p>
+              <button className="mt-4 w-full bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/80 transition-colors duration-300">Continue</button>
+            </div>
+            <div className="bg-background p-6 rounded-lg shadow-lg hover:shadow-primary/50 transition-shadow duration-300">
+              <div className="flex items-center gap-4 mb-4">
+                <FaListAlt className="text-primary text-3xl" />
+                <h2 className="text-2xl font-bold">List of Chats</h2>
+              </div>
+              <p className="text-accent/80">View a complete list of all your past conversations.</p>
+              <button className="mt-4 w-full bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/80 transition-colors duration-300">View Chats</button>
             </div>
           </div>
         </div>

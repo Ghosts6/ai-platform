@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base Styles */
 @layer base {
   #root {
     @apply min-h-screen w-full flex flex-col bg-background text-accent;
@@ -36,6 +37,7 @@
   }
 }
 
+/* Component Styles */
 @layer components {
   .header-career {
     --border-color: linear-gradient(-45deg, #3F72AF, #112D4E, #DBE2EF);
@@ -141,4 +143,245 @@
   .nav-link:hover::before {
     @apply w-full;
   }
+}
+
+/* Custom CSS */
+.agent-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.agent-content {
+    text-align: center;
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.agent-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.agent-description {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.agent-button {
+    display: inline-block;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.agent-button:hover {
+    background-color: #0056b3;
+}
+
+.chat-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.chat-box {
+    width: 100%;
+    max-width: 800px;
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    color: #000000;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 70%;
+    word-wrap: break-word;
+    animation: fadeIn 0.5s ease;
+}
+
+.message.user {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+}
+
+.message.agent {
+    background-color: #e9e9eb;
+    color: #000000 !important;
+    align-self: flex-start;
+}
+
+.chat-input-form {
+    display: flex;
+    padding: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.chat-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.chat-input:focus {
+    border-color: #007bff;
+}
+
+.chat-send-button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.chat-send-button:hover {
+    background-color: #0056b3;
+}
+
+.chat-send-button:active {
+    transform: scale(0.98);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.login-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+.login-box {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.login-toggle {
+    display: flex;
+    margin-bottom: 20px;
+    background-color: #e9e9eb;
+    border-radius: 20px;
+    padding: 5px;
+}
+
+.login-toggle button {
+    padding: 10px 20px;
+    border: none;
+    background-color: transparent;
+    color: #333;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-toggle button.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 400px;
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-input {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: black; /* Ensure text is black */
+}
+
+.login-button {
+    padding: 15px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+    background-color: #0056b3;
+}
+
+.forgot-password {
+    margin-top: 10px;
+    text-align: center;
+    color: #007bff;
+    text-decoration: none;
+}
+.login-button-header {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-button-header:hover {
+    background-color: #0056b3;
+}
+
+.login-button-header:active {
+    transform: scale(0.98);
 }
