@@ -15,3 +15,4 @@ anyio
 requests
 O365
 django-cors-headers
+django_rest_passwordreset
