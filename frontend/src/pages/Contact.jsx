@@ -14,7 +14,8 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (website) { // If honeypot is filled, do nothing
+    // If honeypot is filled, do nothing (bot detected)
+    if (website) {
       return;
     }
 
@@ -41,11 +42,9 @@ export default function Contact() {
     }
 
     try {
-      const response = await axios.post('/core/contact/', {
-        name,
-        email,
-        message,
-      });
+      // Always send the honeypot field to backend for validation
+      const payload = { name, email, message, website };
+      const response = await axios.post('/core/contact/', payload);
 
       Swal.fire({
         icon: 'success',
@@ -61,7 +60,13 @@ export default function Contact() {
     } catch (error) {
       let errorMessage = 'Something went wrong!';
       if (error.response && error.response.data) {
-        errorMessage = Object.values(error.response.data).join(' ');
+        if (typeof error.response.data === 'object') {
+          errorMessage = Object.values(error.response.data).join(' ');
+        } else if (typeof error.response.data === 'string' && error.response.data.startsWith('<')) {
+          errorMessage = 'Server error. Please try again later.';
+        } else {
+          errorMessage = error.response.data;
+        }
       }
       Swal.fire({
         icon: 'error',
