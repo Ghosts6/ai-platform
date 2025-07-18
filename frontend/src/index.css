@@ -145,7 +145,7 @@
   }
 
   .login-box {
-    @apply w-full h-full bg-[#111111] shadow-2xl p-8 mx-auto z-10;
+    @apply w-full h-full bg-background shadow-2xl p-8 mx-auto z-10;
     background-image: linear-gradient(32deg, rgba(8,8,8,0.74) 30px, transparent);
     background-position: -5px -5px;
   }
@@ -238,6 +238,33 @@
   .login-button-header:active {
     transform: scale(0.97);
   }
+}
+
+/* Logo icon hover */
+.logo-icon-wrapper {
+  display: flex;
+  align-items: center;
+}
+.logo-icon-wrapper .logo-hover {
+  transition: transform 0.3s;
+}
+.logo-icon-wrapper:hover .logo-hover {
+  transform: scale(1.1);
+}
+.logo-icon-wrapper:active .logo-hover {
+  transform: scale(0.95);
+}
+
+/* Logo text writing animation */
+.logo-text-animate {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: logo-reveal 1.2s steps(10, end) 0.2s 1 normal both;
+}
+@keyframes logo-reveal {
+  from { width: 0; }
+  to { width: 7.5ch; }
 }
 
 /* Custom CSS */
@@ -388,7 +415,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background-color: #f0f2f5;
+    background-color: #222831; /* Changed from #f0f2f5 to match Contact page */
     overflow: hidden; /* Prevent scrolling */
 }
 
@@ -514,4 +541,34 @@
 .logout-button-nav:hover, .logout-button-nav:focus {
   background: linear-gradient(90deg, #b71c1c 0%, #ff1744 100%);
   transform: scale(0.97);
+}
+
+/* Hero section animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fadeIn {
+  animation: fadeIn 1.2s cubic-bezier(0.4,0,0.2,1) 0.1s both;
+}
+@keyframes heroImageFade {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-heroImageFade {
+  animation: heroImageFade 1.2s cubic-bezier(0.4,0,0.2,1) 0.2s both;
+}
+@keyframes heroTextSlide {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-heroTextSlide {
+  animation: heroTextSlide 1.1s cubic-bezier(0.4,0,0.2,1) 0.4s both;
+}
+@keyframes heroTextFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-heroTextFade {
+  animation: heroTextFade 1.2s cubic-bezier(0.4,0,0.2,1) 0.7s both;
 }

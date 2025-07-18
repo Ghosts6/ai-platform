@@ -1,6 +1,6 @@
 # 🧠 AIAgent
 
-![baner](frontend/public/img/Baner.png)
+![baner](/img/Baner.png)
 
 AIAgent is a full-stack framework for building and managing intelligent, task-oriented agents. It combines a powerful Django backend with a modern React frontend, providing a robust foundation for automating workflows and interacting with AI models.
 
