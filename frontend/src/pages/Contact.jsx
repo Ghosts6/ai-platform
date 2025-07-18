@@ -61,7 +61,7 @@ export default function Contact() {
       let errorMessage = 'Something went wrong!';
       if (error.response && error.response.data) {
         if (typeof error.response.data === 'object') {
-          errorMessage = Object.values(error.response.data).join(' ');
+        errorMessage = Object.values(error.response.data).join(' ');
         } else if (typeof error.response.data === 'string' && error.response.data.startsWith('<')) {
           errorMessage = 'Server error. Please try again later.';
         } else {

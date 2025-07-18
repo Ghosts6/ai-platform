@@ -8,15 +8,18 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'fav/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'fav/favicon-16x16.png' %}">
     <link rel="stylesheet" href="{% static 'css/django-tailwind.generated.css' %}">
+    <script src="{% static 'js/maintenance.js' %}"></script>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-background text-accent font-body">
-    <div class="box text-center p-8 rounded-2xl bg-surface shadow-2xl w-full max-w-lg animate-fadeIn">
-        <svg class="mx-auto mb-4" width="64" height="64" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#00ADB5" opacity="0.2"/><path d="M12 8v4m0 4h.01" stroke="#00ADB5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <h1 class="text-4xl font-extrabold text-primary mb-2">We'll be back soon!</h1>
-        <h2 class="text-xl font-semibold mb-4">Scheduled Maintenance</h2>
-        <p class="text-lg text-accent/90 mb-6">Sorry for the inconvenience. We're performing some maintenance at the moment.<br>Please check back later or <a href="mailto:contact@aiagent.com" class="underline text-primary hover:text-primary-hover">contact support</a> if you need urgent help.</p>
+<body class="min-h-screen min-w-full m-0 p-0 font-sans relative overflow-hidden flex items-center justify-center bg-background text-accent font-body">
+    <div id="maintenance-bg" class="fixed top-0 left-0 w-screen h-screen z-0 bg-cover bg-center bg-no-repeat blur-[1px] brightness-75 transition-all duration-500 [image-rendering:auto] [image-rendering:-webkit-optimize-contrast] [image-rendering:crisp-edges]"></div>
+    <div class="fixed top-0 left-0 w-screen h-screen z-5 bg-gradient-to-br from-black/20 via-transparent to-black/30 pointer-events-none"></div>
+    <div class="relative z-10 text-center p-10 w-full max-w-xl mx-auto bg-slate-800/45 border-4 border-double border-cyan-300 rounded-2xl shadow-[0_8px_32px_0_rgba(0,173,181,0.25),0_2px_8px_0_rgba(0,0,0,0.10)] backdrop-blur-[8px] backdrop-saturate-[1.2] transition-shadow transition-colors duration-300 hover:shadow-[0_12px_48px_0_rgba(0,255,255,0.25),0_4px_16px_0_rgba(0,173,181,0.18)] hover:border-cyan-500">
+        <svg class="mx-auto mb-4" width="64" height="64" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#00ADB5" opacity="0.2"/><path d="M12 8v4m0 4h.01" stroke="#00FFF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h1 class="text-4xl font-extrabold mb-2 text-white drop-shadow">We'll be back soon!</h1>
+        <h2 class="text-xl font-semibold mb-4 text-white drop-shadow">Scheduled Maintenance</h2>
+        <p class="text-lg mb-6 text-white drop-shadow">Sorry for the inconvenience. We're performing some maintenance at the moment.<br>Please check back later or <a href="mailto:contact@aiagent.com" class="underline text-cyan-300 hover:text-cyan-500">contact support</a> if you need urgent help.</p>
         <a href="https://github.com/Ghosts6" class="inline-block px-6 py-2 rounded-lg bg-primary hover:bg-primary-hover text-background font-semibold shadow transition">GitHub</a>
     </div>
-    <footer class="fixed bottom-0 w-full text-center text-accent/60 text-sm py-2 bg-secondary/50 tracking-wide">&copy; 2025 AIAgent Platform &mdash; All rights reserved.</footer>
+    <footer class="fixed bottom-0 w-full text-center text-accent/60 text-sm py-2 bg-secondary/50 tracking-wide z-20">&copy; 2025 AIAgent Platform &mdash; All rights reserved.</footer>
 </body>
 </html>
