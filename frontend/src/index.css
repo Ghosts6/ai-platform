@@ -572,3 +572,13 @@
 .animate-heroTextFade {
   animation: heroTextFade 1.2s cubic-bezier(0.4,0,0.2,1) 0.7s both;
 }
+
+/* Markdown Image Centering */
+.markdown-body img {
+  @apply block mx-auto max-w-full h-auto text-center;
+}
+
+.markdown-body img[alt*="baner"], 
+.markdown-body img[alt*="banner"] {
+  @apply block mx-auto my-8 max-w-full h-auto text-center;
+}

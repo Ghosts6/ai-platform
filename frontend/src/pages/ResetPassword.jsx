@@ -35,6 +35,16 @@ const ResetPassword = () => {
             });
             return;
         }
+        // Enhanced password validation: 8+ chars, uppercase, lowercase, digit, special char
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+        if (!passwordRegex.test(password)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Weak Password',
+                text: 'Password must be 8+ characters with uppercase, lowercase, digit, and special character.',
+            });
+            return;
+        }
         if (!token) {
             Swal.fire({
                 icon: 'error',
@@ -44,7 +54,11 @@ const ResetPassword = () => {
             return;
         }
         try {
-            await axios.post('/profiles/password-reset/confirm/', { token, password, website });
+            await axios.post('/profiles/password-reset/confirm/', { 
+                token, 
+                password, 
+                website 
+            });
             Swal.fire({
                 icon: 'success',
                 title: 'Password reset successful! Please log in.',
@@ -53,10 +67,13 @@ const ResetPassword = () => {
             });
             setTimeout(() => navigate('/login'), 1800);
         } catch (err) {
+            let msg = 'Something went wrong';
+            if (err.response?.data?.password) msg = err.response.data.password;
+            else if (err.response?.data?.error) msg = err.response.data.error;
             Swal.fire({
                 icon: 'error',
                 title: 'Reset failed',
-                text: err.response?.data?.error || 'Something went wrong',
+                text: msg,
             });
         }
     };

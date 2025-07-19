@@ -73,9 +73,10 @@ const Login = () => {
         const username = e.target.username.value;
         const email = e.target.email.value;
         const password = e.target.password.value;
+        const confirmPassword = e.target.confirmPassword.value;
         const website = e.target.website.value;
         if (website) return;
-        if (!username || !email || !password) {
+        if (!username || !email || !password || !confirmPassword) {
             Swal.fire({
                 icon: 'error',
                 title: 'Missing Fields',
@@ -86,13 +87,24 @@ const Login = () => {
             });
             return;
         }
-        // Password validation: 8-40 chars, at least one uppercase, one lowercase
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z]).{8,40}$/;
+        if (password !== confirmPassword) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Password Mismatch',
+                text: 'Passwords do not match!',
+                background: '#222831',
+                color: '#EEEEEE',
+                confirmButtonColor: '#007bff',
+            });
+            return;
+        }
+        // Enhanced password validation: 8+ chars, uppercase, lowercase, digit, special char
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
         if (!passwordRegex.test(password)) {
             Swal.fire({
                 icon: 'error',
                 title: 'Weak Password',
-                text: 'Password must be 8-40 characters, include uppercase and lowercase letters.',
+                text: 'Password must be 8+ characters with uppercase, lowercase, digit, and special character.',
                 background: '#222831',
                 color: '#EEEEEE',
                 confirmButtonColor: '#007bff',
@@ -101,7 +113,13 @@ const Login = () => {
             return;
         }
         try {
-            const res = await axios.post('/profiles/register/', { username, email, password, website });
+            const res = await axios.post('/profiles/register/', { 
+                username, 
+                email, 
+                password, 
+                confirm_password: confirmPassword,
+                website 
+            });
             // Auto-login after signup
             const loginRes = await axios.post('/profiles/login/', { username, password, website: '' });
             localStorage.setItem('token', loginRes.data.token);
@@ -121,6 +139,9 @@ const Login = () => {
             if (err.response?.data?.website) msg = err.response.data.website;
             else if (err.response?.data?.username) msg = err.response.data.username;
             else if (err.response?.data?.email) msg = err.response.data.email;
+            else if (err.response?.data?.password) msg = err.response.data.password;
+            else if (err.response?.data?.confirm_password) msg = err.response.data.confirm_password;
+            else if (err.response?.data?.non_field_errors) msg = err.response.data.non_field_errors[0];
             Swal.fire({
                 icon: 'error',
                 title: 'Signup failed',
@@ -167,10 +188,11 @@ const Login = () => {
                         <input name="username" type="text" placeholder="Username" className="login-input" />
                         <input name="email" type="email" placeholder="Email" className="login-input" />
                         <input name="password" type="password" placeholder="Password" className="login-input" onFocus={() => setSignupPasswordGuide(true)} onBlur={() => setSignupPasswordGuide(false)} />
+                        <input name="confirmPassword" type="password" placeholder="Confirm Password" className="login-input" />
                         <input type="text" name="website" value={website} onChange={e => setWebsite(e.target.value)} className="hidden" autoComplete="off" tabIndex="-1" />
                         {signupPasswordGuide && (
                             <div className="text-xs text-accent/80 mb-2 mt-[-12px]">
-                                Password must be 8-40 characters, include uppercase and lowercase letters.
+                                Password must be 8+ characters with uppercase, lowercase, digit, and special character.
                             </div>
                         )}
                         <button type="submit" className="login-button">Sign Up</button>

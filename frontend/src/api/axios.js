@@ -22,8 +22,38 @@ const instance = axios.create({
     baseURL: 'http://127.0.0.1:8000/api',
     withCredentials: true,
     headers: {
-        'X-CSRFToken': csrftoken
+        'X-CSRFToken': csrftoken,
+        'Content-Type': 'application/json'
     }
 });
+
+// Request interceptor to add auth token
+instance.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Token ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+// Response interceptor to handle auth errors
+instance.interceptors.response.use(
+    (response) => {
+        return response;
+    },
+    (error) => {
+        // Handle 401 Unauthorized errors
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
 
 export default instance;
