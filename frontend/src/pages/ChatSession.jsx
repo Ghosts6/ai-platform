@@ -1,19 +1,15 @@
-
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from '../api/axios';
-import Swal from 'sweetalert2';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { FiSend } from 'react-icons/fi';
 
-const Chat = () => {
+const ChatSession = () => {
+    const { sessionId } = useParams();
+    const [messages, setMessages] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [prompt, setPrompt] = useState('');
-    const [messages, setMessages] = useState([{
-        text: "Hi! I'm your AI assistant. How can I help you today? You can ask me anything you need!",
-        sender: 'agent'
-    }]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -21,23 +17,23 @@ const Chat = () => {
     };
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        const fetchSession = async () => {
+            try {
+                const res = await axios.get(`/core/chat/session/${sessionId}/`, {
+                    headers: { Authorization: `Token ${localStorage.getItem('token')}` }
+                });
+                setMessages(res.data);
+            } catch (error) {
+                console.error('Error fetching chat session:', error);
+            }
+            setIsLoading(false);
+        };
+        fetchSession();
+    }, [sessionId]);
 
     useEffect(() => {
-        if (!isLoggedIn) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Guest User',
-                text: 'Your chat history will not be saved. Please login to save your chats.',
-                background: '#222831',
-                color: '#EEEEEE',
-                confirmButtonColor: '#007bff',
-            });
-        }
-    }, [isLoggedIn]);
-
-    const [session_id, setSessionId] = useState(null);
+        scrollToBottom();
+    }, [messages]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -49,22 +45,10 @@ const Chat = () => {
         setIsLoading(true);
 
         try {
-            const res = await axios.post('/agent/respond/', { prompt, session_id });
+            const res = await axios.post('/agent/respond/', { prompt, session_id: sessionId });
             setMessages([...newMessages, { text: res.data.response, sender: 'agent' }]);
-            if (isLoggedIn && !session_id) {
-                setSessionId(res.data.session_id);
-            }
         } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Error communicating with the agent.',
-                customClass: {
-                    popup: 'bg-surface',
-                    title: 'text-red-500',
-                    content: 'text-accent'
-                }
-            });
+            console.error('Error sending message:', error);
         }
         setIsLoading(false);
     };
@@ -125,4 +109,4 @@ const Chat = () => {
     );
 };
 
-export default Chat;
+export default ChatSession;

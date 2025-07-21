@@ -12,6 +12,9 @@ import Readme from './pages/Readme';
 import Contact from './pages/Contact';
 
 
+import ChatHistory from './pages/ChatHistory';
+import ChatSession from './pages/ChatSession';
+
 function App() {
   return (
     <Router>
@@ -19,6 +22,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/agent" element={<Agent />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/chat/history" element={<ChatHistory />} />
+        <Route path="/chat/:sessionId" element={<ChatSession />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />

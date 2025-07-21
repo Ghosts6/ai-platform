@@ -5,6 +5,9 @@ from django.test import Client
 from agent.agent_manager import AgentRouter
 from django.apps import apps
 ContactMessage = apps.get_model('core_services', 'ContactMessage')
+from core_services.models import ChatSession, ChatMessage
+from django.contrib.auth.models import User
+from rest_framework.test import APIClient
 
 @pytest.fixture
 def client():
@@ -88,3 +91,52 @@ def test_contact_message_bot(client):
     assert res.status_code == 200
     assert res.json()['message'] == 'Bot detected.'
     assert not ContactMessage.objects.filter(email='bot@example.com').exists()
+
+@pytest.mark.django_db
+def test_chat_history_view():
+    user = User.objects.create_user(username='testuser', password='testpass')
+    session1 = ChatSession.objects.create(user=user)
+    session2 = ChatSession.objects.create(user=user)
+    ChatMessage.objects.create(session=session1, sender='user', text='Hello')
+    ChatMessage.objects.create(session=session1, sender='agent', text='Hi!')
+    ChatMessage.objects.create(session=session2, sender='user', text='Another chat')
+    client = APIClient()
+    client.force_authenticate(user=user)
+    res = client.get('/api/core/chat/history/')
+    assert res.status_code == 200
+    assert len(res.json()) == 2
+    assert res.json()[0]['id'] == session2.id  # Most recent first
+    assert res.json()[1]['id'] == session1.id
+
+@pytest.mark.django_db
+def test_chat_session_view():
+    user = User.objects.create_user(username='testuser', password='testpass')
+    session = ChatSession.objects.create(user=user)
+    ChatMessage.objects.create(session=session, sender='user', text='Hello')
+    ChatMessage.objects.create(session=session, sender='agent', text='Hi!')
+    client = APIClient()
+    client.force_authenticate(user=user)
+    res = client.get(f'/api/core/chat/session/{session.id}/')
+    assert res.status_code == 200
+    assert len(res.json()) == 2
+    assert res.json()[0]['sender'] == 'user'
+    assert res.json()[1]['sender'] == 'agent'
+    # Test not found
+    res2 = client.get(f'/api/core/chat/session/9999/')
+    assert res2.status_code == 404
+
+@pytest.mark.django_db
+def test_last_chat_session_view():
+    user = User.objects.create_user(username='testuser', password='testpass')
+    session1 = ChatSession.objects.create(user=user)
+    session2 = ChatSession.objects.create(user=user)
+    client = APIClient()
+    client.force_authenticate(user=user)
+    res = client.get('/api/core/chat/last/')
+    assert res.status_code == 200
+    assert res.json()['id'] == session2.id
+    # Test no session
+    user2 = User.objects.create_user(username='emptyuser', password='testpass')
+    client.force_authenticate(user=user2)
+    res2 = client.get('/api/core/chat/last/')
+    assert res2.status_code == 404

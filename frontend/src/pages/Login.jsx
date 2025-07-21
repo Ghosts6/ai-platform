@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Swal from 'sweetalert2';
 import axios from '../api/axios';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Login = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +13,12 @@ const Login = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
     const [signupPasswordGuide, setSignupPasswordGuide] = useState(false);
     const navigate = useNavigate();
+    const [showLoginPassword, setShowLoginPassword] = useState(false);
+    const [showSignupPassword, setShowSignupPassword] = useState(false);
+    const [showSignupConfirm, setShowSignupConfirm] = useState(false);
+    const [loginPasswordValue, setLoginPasswordValue] = useState('');
+    const [signupPasswordValue, setSignupPasswordValue] = useState('');
+    const [signupConfirmValue, setSignupConfirmValue] = useState('');
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -178,7 +185,26 @@ const Login = () => {
                 ) : isLogin ? (
                     <form className="login-form" onSubmit={handleLogin}>
                         <input name="username" type="text" placeholder="Username" className="login-input" />
-                        <input name="password" type="password" placeholder="Password" className="login-input" />
+                        <div className="password-input-wrapper mb-4">
+                            <input
+                                name="password"
+                                type={showLoginPassword ? 'text' : 'password'}
+                                placeholder="Password"
+                                className="login-input pr-12"
+                                value={loginPasswordValue}
+                                onChange={e => setLoginPasswordValue(e.target.value)}
+                                autoComplete="current-password"
+                            />
+                            <button
+                                type="button"
+                                tabIndex="-1"
+                                className={`password-toggle-btn${loginPasswordValue ? '' : ' invisible'}`}
+                                onClick={() => setShowLoginPassword(v => !v)}
+                                aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                            >
+                                {showLoginPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                            </button>
+                        </div>
                         <input type="text" name="website" value={website} onChange={e => setWebsite(e.target.value)} className="hidden" autoComplete="off" tabIndex="-1" />
                         <button type="submit" className="login-button">Login</button>
                         <Link to="/forgot-password" className="forgot-password">Forgot Password?</Link>
@@ -187,14 +213,47 @@ const Login = () => {
                     <form className="login-form" onSubmit={handleSignup}>
                         <input name="username" type="text" placeholder="Username" className="login-input" />
                         <input name="email" type="email" placeholder="Email" className="login-input" />
-                        <input name="password" type="password" placeholder="Password" className="login-input" onFocus={() => setSignupPasswordGuide(true)} onBlur={() => setSignupPasswordGuide(false)} />
-                        <input name="confirmPassword" type="password" placeholder="Confirm Password" className="login-input" />
+                        <div className="password-input-wrapper mb-4">
+                            <input
+                                name="password"
+                                type={showSignupPassword ? 'text' : 'password'}
+                                placeholder="Password"
+                                className="login-input pr-12"
+                                value={signupPasswordValue}
+                                onChange={e => setSignupPasswordValue(e.target.value)}
+                                autoComplete="new-password"
+                            />
+                            <button
+                                type="button"
+                                tabIndex="-1"
+                                className={`password-toggle-btn${signupPasswordValue ? '' : ' invisible'}`}
+                                onClick={() => setShowSignupPassword(v => !v)}
+                                aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
+                            >
+                                {showSignupPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                            </button>
+                        </div>
+                        <div className="password-input-wrapper mb-4">
+                            <input
+                                name="confirmPassword"
+                                type={showSignupConfirm ? 'text' : 'password'}
+                                placeholder="Confirm Password"
+                                className="login-input pr-12"
+                                value={signupConfirmValue}
+                                onChange={e => setSignupConfirmValue(e.target.value)}
+                                autoComplete="new-password"
+                            />
+                            <button
+                                type="button"
+                                tabIndex="-1"
+                                className={`password-toggle-btn${signupConfirmValue ? '' : ' invisible'}`}
+                                onClick={() => setShowSignupConfirm(v => !v)}
+                                aria-label={showSignupConfirm ? 'Hide password' : 'Show password'}
+                            >
+                                {showSignupConfirm ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                            </button>
+                        </div>
                         <input type="text" name="website" value={website} onChange={e => setWebsite(e.target.value)} className="hidden" autoComplete="off" tabIndex="-1" />
-                        {signupPasswordGuide && (
-                            <div className="text-xs text-accent/80 mb-2 mt-[-12px]">
-                                Password must be 8+ characters with uppercase, lowercase, digit, and special character.
-                            </div>
-                        )}
                         <button type="submit" className="login-button">Sign Up</button>
                     </form>
                 )}

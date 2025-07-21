@@ -66,11 +66,11 @@ class QAPairAgent(AgentBase):
                     ],
                     temperature=0.5,
                 )
-                choice = response.choices[0]
-                if hasattr(choice, "message"):
-                    answer = choice.message['content']
+                msg = response.choices[0].message
+                if isinstance(msg, dict):
+                    answer = msg.get('content')
                 else:
-                    answer = choice['message']['content']
+                    answer = msg.content
                 AgentMemory.objects.update_or_create(
                     agent_name=self.name, key=q, defaults={"value": answer}
                 )

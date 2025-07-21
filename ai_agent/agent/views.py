@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .agent_manager import AgentRouter
-from core_services.models import AgentMemory
+from core_services.models import AgentMemory, ChatSession, ChatMessage
 
 router = AgentRouter()
 
@@ -15,11 +15,26 @@ def respond_to_prompt(request):
         try:
             data = json.loads(request.body)
             prompt = data.get('prompt', '')
+            session_id = data.get('session_id')
+
             if not prompt:
                 return JsonResponse({'error': 'Prompt is required'}, status=400)
 
-            response = router.route(prompt)
-            return JsonResponse({'response': response})
+            response_text = router.route(prompt)
+
+            if request.user.is_authenticated:
+                if session_id:
+                    session = ChatSession.objects.get(id=session_id, user=request.user)
+                else:
+                    session = ChatSession.objects.create(user=request.user)
+                
+                ChatMessage.objects.create(session=session, sender='user', text=prompt)
+                ChatMessage.objects.create(session=session, sender='agent', text=response_text)
+                
+                return JsonResponse({'response': response_text, 'session_id': session.id})
+            else:
+                return JsonResponse({'response': response_text})
+
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Invalid request method'}, status=405)

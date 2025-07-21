@@ -1,10 +1,62 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { FaRobot, FaComments, FaHistory, FaListAlt } from 'react-icons/fa';
+import axios from '../api/axios';
+import Swal from 'sweetalert2';
 
 export default function Agent() {
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleStorage = () => setIsLoggedIn(!!localStorage.getItem('token'));
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  const handleHistoryClick = () => {
+    if (isLoggedIn) {
+      navigate('/chat/history');
+    } else {
+      navigate('/login');
+    }
+  };
+
+  const handleContinueChat = async () => {
+    if (!isLoggedIn) {
+      navigate('/login');
+      return;
+    }
+    try {
+      const res = await axios.get('/core/chat/last/', {
+        headers: { Authorization: `Token ${localStorage.getItem('token')}` }
+      });
+      if (res.data && res.data.id) {
+        navigate(`/chat/${res.data.id}`);
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'No Previous Chat',
+          text: 'You have no previous chat sessions. Start a new chat!',
+          background: '#222831',
+          color: '#EEEEEE',
+          confirmButtonColor: '#007bff',
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'info',
+        title: 'No Previous Chat',
+        text: 'You have no previous chat sessions. Start a new chat!',
+        background: '#222831',
+        color: '#EEEEEE',
+        confirmButtonColor: '#007bff',
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-accent font-body">
       <Header />
@@ -35,7 +87,7 @@ export default function Agent() {
                 <h2 className="text-2xl font-bold">Continue Chat</h2>
               </div>
               <p className="text-accent/80">Resume a previous conversation from your chat history.</p>
-              <button className="mt-4 w-full bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/80 transition-colors duration-300">Continue</button>
+              <button onClick={handleContinueChat} className="mt-4 w-full bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/80 transition-colors duration-300">Continue</button>
             </div>
             <div className="bg-background p-6 rounded-lg shadow-lg hover:shadow-primary/50 transition-shadow duration-300">
               <div className="flex items-center gap-4 mb-4">
@@ -43,7 +95,7 @@ export default function Agent() {
                 <h2 className="text-2xl font-bold">List of Chats</h2>
               </div>
               <p className="text-accent/80">View a complete list of all your past conversations.</p>
-              <button className="mt-4 w-full bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/80 transition-colors duration-300">View Chats</button>
+              <button onClick={handleHistoryClick} className="mt-4 w-full bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/80 transition-colors duration-300">View Chats</button>
             </div>
           </div>
         </div>

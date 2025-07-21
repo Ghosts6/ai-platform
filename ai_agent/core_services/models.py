@@ -1,7 +1,18 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils import timezone
 
 # Create your models here.
+
+class ChatSession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class ChatMessage(models.Model):
+    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name='messages')
+    sender = models.CharField(max_length=10) # 'user' or 'agent'
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class AgentLog(models.Model):
     agent_name = models.CharField(max_length=100)
