@@ -8,6 +8,7 @@ ContactMessage = apps.get_model('core_services', 'ContactMessage')
 from core_services.models import ChatSession, ChatMessage
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
+from rest_framework.authtoken.models import Token
 
 @pytest.fixture
 def client():
@@ -140,3 +141,35 @@ def test_last_chat_session_view():
     client.force_authenticate(user=user2)
     res2 = client.get('/api/core/chat/last/')
     assert res2.status_code == 404
+
+@pytest.mark.django_db
+@patch('core_services.agents.qa.openai.chat.completions.create')
+def test_chat_session_created_for_authenticated_user(mock_create):
+    # Mock OpenAI response
+    mock_create.return_value = MagicMock(choices=[MagicMock(message={'content': 'Test answer'})])
+
+    user = User.objects.create_user(username='testuser', password='testpass')
+    token = Token.objects.create(user=user)
+    client = Client()
+    prompt = "What is the capital of France?"
+
+    # Send request with token in header
+    res = client.post(
+        '/api/agent/respond/',
+        data=json.dumps({'prompt': prompt}),
+        content_type='application/json',
+        HTTP_AUTHORIZATION=f'Token {token.key}'
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert 'response' in data
+    assert 'session_id' in data
+
+    # Check that a ChatSession and two ChatMessages were created
+    session = ChatSession.objects.get(id=data['session_id'], user=user)
+    messages = ChatMessage.objects.filter(session=session)
+    assert messages.count() == 2
+    assert messages[0].sender == 'user'
+    assert messages[0].text == prompt
+    assert messages[1].sender == 'agent'
+    assert "Test answer" in messages[1].text

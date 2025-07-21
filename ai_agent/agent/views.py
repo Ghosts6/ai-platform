@@ -3,6 +3,8 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .agent_manager import AgentRouter
 from core_services.models import AgentMemory, ChatSession, ChatMessage
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import AnonymousUser
 
 router = AgentRouter()
 
@@ -17,16 +19,26 @@ def respond_to_prompt(request):
             prompt = data.get('prompt', '')
             session_id = data.get('session_id')
 
+            user = AnonymousUser()
+            auth_header = request.META.get('HTTP_AUTHORIZATION')
+            if auth_header and auth_header.startswith('Token '):
+                token_key = auth_header.split(' ')[1]
+                try:
+                    token = Token.objects.get(key=token_key)
+                    user = token.user
+                except Token.DoesNotExist:
+                    pass
+
             if not prompt:
                 return JsonResponse({'error': 'Prompt is required'}, status=400)
 
             response_text = router.route(prompt)
 
-            if request.user.is_authenticated:
+            if user.is_authenticated:
                 if session_id:
-                    session = ChatSession.objects.get(id=session_id, user=request.user)
+                    session = ChatSession.objects.get(id=session_id, user=user)
                 else:
-                    session = ChatSession.objects.create(user=request.user)
+                    session = ChatSession.objects.create(user=user)
                 
                 ChatMessage.objects.create(session=session, sender='user', text=prompt)
                 ChatMessage.objects.create(session=session, sender='agent', text=response_text)
