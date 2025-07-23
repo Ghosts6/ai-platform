@@ -32,6 +32,14 @@ class Command(BaseCommand):
             return
 
         # Build React app
+        self.stdout.write(self.style.WARNING('Installing frontend dependencies...'))
+        try:
+            subprocess.run(['npm', 'install'], cwd=frontend_dir, check=True)
+            self.stdout.write(self.style.SUCCESS('Frontend dependencies installed successfully.'))
+        except subprocess.CalledProcessError as e:
+            self.stdout.write(self.style.ERROR(f"Error occurred while installing frontend dependencies: {e}"))
+            return
+
         self.stdout.write(self.style.WARNING('Building React app...'))
         try:
             subprocess.run(['npm', 'run', 'build'], cwd=frontend_dir, check=True)
