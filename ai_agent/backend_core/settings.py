@@ -130,10 +130,16 @@ WSGI_APPLICATION = "backend_core.wsgi.application"
 # Media & Static files
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [
-    BASE_DIR / '..' / 'frontend' / 'dist',
-    BASE_DIR / 'backend_core' / 'Static',
-]
+
+FRONTEND_DIST = BASE_DIR / '..' / 'frontend' / 'dist'
+BACKEND_STATIC = BASE_DIR / 'backend_core' / 'Static'
+
+STATICFILES_DIRS = []
+if FRONTEND_DIST.exists():
+    STATICFILES_DIRS.append(FRONTEND_DIST)
+if BACKEND_STATIC.exists():
+    STATICFILES_DIRS.append(BACKEND_STATIC)
+
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Configure WhiteNoise for static files
