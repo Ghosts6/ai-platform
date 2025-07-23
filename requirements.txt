@@ -17,3 +17,4 @@ O365
 django-cors-headers
 django-rest-passwordreset
 argon2
+gunicorn
