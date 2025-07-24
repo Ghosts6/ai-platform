@@ -39,19 +39,13 @@ MS_REDIRECT_URI = os.getenv("MS_REDIRECT_URI")
 
 # CROSS config
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "https://ai-platform-w37g.onrender.com",  # <-- Replace with your actual frontend Render URL
+    "https://ai-platform-w37g.onrender.com",
+    "https://ai-platform-w37g.onrender.com",
 ]
-
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://ai-platform-w37g.onrender.com",  # <-- Replace with your actual frontend Render URL
+    "https://ai-platform-w37g.onrender.com",
 ]
 
 # Installed apps
