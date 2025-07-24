@@ -39,12 +39,13 @@ MS_REDIRECT_URI = os.getenv("MS_REDIRECT_URI")
 
 # CROSS config
 CORS_ALLOWED_ORIGINS = [
-    "https://ai-platform-w37g.onrender.com",
+    "api.kiarashbashokian.com",
     "https://ai-platform-w37g.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
+    "https://ai.kiarashbashokian.com",
     "https://ai-platform-w37g.onrender.com",
 ]
 
