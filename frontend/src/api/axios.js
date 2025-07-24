@@ -20,7 +20,7 @@ const csrftoken = getCookie('csrftoken');
 
 const isProd = process.env.NODE_ENV === 'production';
 const API_BASE_URL = isProd
-  ? 'https://ai-platform-w37g.onrender.com/api'
+  ? 'https://ai.kiarashbashokian.com/api'
   : (process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000/api');
 
 const instance = axios.create({

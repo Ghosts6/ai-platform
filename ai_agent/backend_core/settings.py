@@ -13,7 +13,10 @@ load_dotenv(BASE_DIR / ".env")
 # ENV VARS
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [
+    "ai.kiarashbashokian.com",
+    "ai-platform-w37g.onrender.com",
+]
 IS_TESTING = os.getenv("TEST_MODE", "False") == "True"
 MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "False").lower() == "true"
 
@@ -39,7 +42,7 @@ MS_REDIRECT_URI = os.getenv("MS_REDIRECT_URI")
 
 # CROSS config
 CORS_ALLOWED_ORIGINS = [
-    "api.kiarashbashokian.com",
+    "https://ai.kiarashbashokian.com",
     "https://ai-platform-w37g.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
