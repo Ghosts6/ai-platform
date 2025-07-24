@@ -43,6 +43,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "https://ai-platform-w37g.onrender.com",  # <-- Replace with your actual frontend Render URL
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -50,6 +51,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://ai-platform-w37g.onrender.com",  # <-- Replace with your actual frontend Render URL
 ]
 
 # Installed apps

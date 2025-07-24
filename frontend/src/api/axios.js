@@ -18,6 +18,7 @@ function getCookie(name) {
 
 const csrftoken = getCookie('csrftoken');
 
+// In production, set REACT_APP_API_BASE_URL in Render frontend environment variables to your backend Render URL, e.g. https://ai-platform-w37g.onrender.com/api
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000/api';
 
 const instance = axios.create({
