@@ -26,7 +26,11 @@ urlpatterns = [
     # static files config
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
 
+    # Serve favicon.ico from static files
+    re_path(r'^favicon\.ico$', serve, {'document_root': settings.STATIC_ROOT / 'fav', 'path': 'favicon.ico'}),
+
     path('README.md', views.ReadmeView.as_view(), name='readme_file'),
+
     # catch all react patterns - must be last
     re_path(r'^.*$', home_views.index, name='home'),
 ]
