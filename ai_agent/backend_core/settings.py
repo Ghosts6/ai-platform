@@ -16,6 +16,7 @@ DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 ALLOWED_HOSTS = [
     "ai.kiarashbashokian.com",
     "ai-platform-w37g.onrender.com",
+    "127.0.0.1:8000",
 ]
 IS_TESTING = os.getenv("TEST_MODE", "False") == "True"
 MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "False").lower() == "true"

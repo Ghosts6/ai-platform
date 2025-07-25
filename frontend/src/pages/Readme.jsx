@@ -56,7 +56,7 @@ export default function ReadmePage() {
               <FaCrown className="text-primary drop-shadow" /> README
             </h1>
           </div>
-          <article className="prose prose-lg max-w-none w-full bg-[#23272f] text-[#f3f6fa] rounded-lg p-4 shadow-inner backdrop-blur-md code-enhanced prose-headings:text-primary prose-a:text-primary prose-pre:bg-[#181b20] prose-code:text-[#00adb5]">
+          <article className="prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none w-full bg-[#23272f] text-[#f3f6fa] rounded-lg p-4 sm:p-6 md:p-8 shadow-inner backdrop-blur-md code-enhanced prose-headings:text-primary prose-a:text-primary prose-pre:bg-[#181b20] prose-code:text-[#00adb5]">
             {loading && <div className="text-center text-accent/60">Loading README...</div>}
             {error && <div className="text-center text-red-600">{error}</div>}
             {!loading && !error && <MarkdownRenderer>{rewriteImagePaths(readme)}</MarkdownRenderer>}
