@@ -38,10 +38,11 @@ Kiarash Bashokian is a skilled Backend Developer based in Toronto, Canada, with 
 
     # Create a list of questions and the corresponding answer
     qa_pairs = {
-        "who is kiarash bashokian?": kiarash_info,
-        "what are kiarash bashokian's skills?": "Kiarash Bashokian has a wide range of skills, including: Python, Django, FastAPI, Flask, JavaScript, React, C++, Java, and more. He is also experienced in database management with PostgreSQL, MySQL, MongoDB, and Redis, as well as DevOps tools like Docker and Git.",
-        "what is kiarash bashokian's experience?": "Kiarash Bashokian has worked as a Web Developer at Gh Light, an IT Expert at Arya heavy machinery, and a trainee at Qt framework. He has experience in backend development, system optimization, network administration, and software development with C++ and Qt.",
-        "where did kiarash bashokian study?": "Kiarash Bashokian is currently pursuing a Bachelor of Computer Science in Software at York University in Toronto, Canada, with an expected graduation date of February 2025.",
+        "who is kiarash bashokian": kiarash_info,
+        "tell me about kiarash bashokian": kiarash_info,
+        "what are kiarash bashokian's skills": "Kiarash Bashokian has a wide range of skills, including: Python, Django, FastAPI, Flask, JavaScript, React, C++, Java, and more. He is also experienced in database management with PostgreSQL, MySQL, MongoDB, and Redis, as well as DevOps tools like Docker and Git.",
+        "what is kiarash bashokian's experience": "Kiarash Bashokian has worked as a Web Developer at Gh Light, an IT Expert at Arya heavy machinery, and a trainee at Qt framework. He has experience in backend development, system optimization, network administration, and software development with C++ and Qt.",
+        "where did kiarash bashokian study": "Kiarash Bashokian is currently pursuing a Bachelor of Computer Science in Software at York University in Toronto, Canada, with an expected graduation date of February 2025.",
     }
 
     for question, answer in qa_pairs.items():

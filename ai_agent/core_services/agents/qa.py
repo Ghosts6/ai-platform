@@ -17,6 +17,26 @@ class QAPairAgent(AgentBase):
     def handle(self, prompt: str) -> str:
         import json
         prompt_lower = prompt.lower()
+
+        # Handle questions about Kiarash Bashokian
+        if 'kiarash bashokian' in prompt_lower:
+            if 'skill' in prompt_lower:
+                mem = AgentMemory.objects.filter(agent_name=self.name, key="what are kiarash bashokian's skills").first()
+                if mem:
+                    return f"Answer: {mem.value}"
+            elif 'experience' in prompt_lower or 'work' in prompt_lower:
+                mem = AgentMemory.objects.filter(agent_name=self.name, key="what is kiarash bashokian's experience").first()
+                if mem:
+                    return f"Answer: {mem.value}"
+            elif 'education' in prompt_lower or 'study' in prompt_lower:
+                mem = AgentMemory.objects.filter(agent_name=self.name, key="where did kiarash bashokian study").first()
+                if mem:
+                    return f"Answer: {mem.value}"
+            else:
+                mem = AgentMemory.objects.filter(agent_name=self.name, key="who is kiarash bashokian").first()
+                if mem:
+                    return f"Answer: {mem.value}"
+
         # Add QA: 'ask What is AI? Answer: Artificial Intelligence.'
         if prompt_lower.startswith("ask ") and "answer:" in prompt_lower:
             try:
@@ -52,7 +72,7 @@ class QAPairAgent(AgentBase):
             return f"No QA found for '{q}'"
         # Get answer from memory or OpenAI
         else:
-            q = prompt.strip()
+            q = prompt.strip().lower().rstrip('?')
             mem = AgentMemory.objects.filter(agent_name=self.name, key=q).first()
             if mem:
                 return f"Answer: {mem.value}"
