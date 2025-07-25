@@ -132,28 +132,16 @@ WSGI_APPLICATION = "backend_core.wsgi.application"
 
 STATIC_URL = "/static/"
 
-FRONTEND_DIST = BASE_DIR / '..' / 'frontend' / 'dist'
-BACKEND_STATIC = BASE_DIR / 'backend_core' / 'Static'
-
-STATICFILES_DIRS = []
-if FRONTEND_DIST.exists():
-    STATICFILES_DIRS.append(FRONTEND_DIST)
-if BACKEND_STATIC.exists():
-    STATICFILES_DIRS.append(BACKEND_STATIC)
-
+# The directory where Django will collect all static files
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Configure WhiteNoise for static files
-STORAGES = {
-    'default': {
-        'BACKEND': 'django.core.files.storage.FileSystemStorage',
-    },
-    'staticfiles': {
-        'BACKEND': 'whitenoise.storage.StaticFilesStorage' if IS_TESTING else 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-    },
-}
+# Directories where Django will look for static files
+STATICFILES_DIRS = [
+    BASE_DIR / 'backend_core' / 'Static',
+    BASE_DIR / '..' / 'frontend' / 'dist',
+]
 
-# Add MIME type configuration
+# Add MIME type configuration for WhiteNoise
 WHITENOISE_MIMETYPES = {
     '.css': 'text/css',
     '.js': 'application/javascript',
@@ -169,6 +157,16 @@ WHITENOISE_MIMETYPES = {
     '.ttf': 'application/font-ttf',
     '.eot': 'application/vnd.ms-fontobject',
     '.otf': 'application/font-otf',
+}
+
+# Configure WhiteNoise for static files
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
 }
 
 # WhiteNoise configuration
