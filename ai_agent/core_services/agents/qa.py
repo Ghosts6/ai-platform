@@ -103,7 +103,7 @@ class QAPairAgent(AgentBase):
             return f"No QA found for '{q}'"
         # Get answer from memory or OpenAI
         else:
-            q = prompt.strip().lower().rstrip('?')
+            q = prompt.strip()
             mem = AgentMemory.objects.filter(agent_name=self.name, key=q).first()
             if mem:
                 return f"Answer: {mem.value}"
