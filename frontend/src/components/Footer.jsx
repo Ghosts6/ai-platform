@@ -10,8 +10,8 @@ export default function Footer() {
           <span>AIAgent Platform</span>
         </div>
         <div className="flex items-center gap-4 text-base md:text-lg">
-          <a href="mailto:contact@aiagent.com" className="flex items-center gap-1 underline hover:text-primary active:scale-95 transition font-semibold" title="Email us">
-            <FaEnvelope className="text-primary" /> contact@aiagent.com
+          <a href="mailto:kiarash@kiarashbashokian.com" className="flex items-center gap-1 underline hover:text-primary active:scale-95 transition font-semibold" title="Email us">
+            <FaEnvelope className="text-primary" /> kiarash@kiarashbashokian.com
           </a>
           <span className="hidden md:inline text-accent/50">|</span>
           <a href="https://github.com/Ghosts6/ai-platform" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 underline hover:text-primary active:scale-95 transition font-semibold" title="GitHub Repository">
