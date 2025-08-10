@@ -1,10 +1,11 @@
 from .base import AgentBase
+from typing import Dict, Any, List, Optional
 import os
 from O365 import Account, FileSystemTokenBackend
 
 class TeamsAgent(AgentBase):
-    def __init__(self, name: str):
-        super().__init__(name)
+    def __init__(self, agent_id: str, name: str, description: str = ""):
+        super().__init__(agent_id, name, description)
         credentials = (
             os.getenv("MS_CLIENT_ID"),
             os.getenv("MS_CLIENT_SECRET")
@@ -21,7 +22,11 @@ class TeamsAgent(AgentBase):
                 'offline_access',
             ])
 
-    def handle(self, prompt: str) -> str:
+    async def process(self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        prompt = task.get("prompt")
+        if not prompt:
+            raise ValueError("Prompt is missing from the task.")
+
         # Example: create a calendar event if prompt contains certain keywords
         keywords = ["maintenance", "survey", "test running"]
         if any(word in prompt.lower() for word in keywords):
@@ -35,5 +40,8 @@ class TeamsAgent(AgentBase):
             event.body = prompt
             # For demo, just save as draft (not send)
             event.save()
-            return f"TeamsAgent: Created calendar event for '{prompt[:50]}...'"
-        return "TeamsAgent: No relevant action triggered."
+            return {"result": f"TeamsAgent: Created calendar event for '{prompt[:50]}...'"}
+        return {"result": "TeamsAgent: No relevant action triggered."}
+
+    def get_capabilities(self) -> List[str]:
+        return ["create_calendar_event"]

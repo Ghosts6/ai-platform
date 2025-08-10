@@ -2,6 +2,8 @@ import openai
 import os
 from .base import AgentBase
 from core_services.models import AgentMemory
+from typing import Dict, Any, List, Optional
+from asgiref.sync import sync_to_async
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -10,12 +12,31 @@ class QAPairAgent(AgentBase):
     An agent that stores prompt-answer pairs, can answer, list, update, and delete QAs.
     Uses OpenAI GPT for answers and stores them for future retrieval.
     """
-    def __init__(self, name: str, client=None):
-        super().__init__(name)
+    def __init__(self, agent_id: str, name: str, description: str = "", client=None):
+        super().__init__(agent_id, name, description)
         self.client = client or openai.chat.completions
 
-    def handle(self, prompt: str) -> str:
-        import json
+    @sync_to_async
+    def _update_or_create_memory(self, key, value):
+        AgentMemory.objects.update_or_create(agent_name=self.name, key=key, defaults={"value": value})
+
+    @sync_to_async
+    def _get_memory(self, key):
+        return AgentMemory.objects.filter(agent_name=self.name, key=key).first()
+
+    @sync_to_async
+    def _delete_memory(self, key):
+        return AgentMemory.objects.filter(agent_name=self.name, key=key).delete()
+
+    @sync_to_async
+    def _save_memory(self, mem):
+        mem.save()
+
+    async def process(self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        prompt = task.get("prompt")
+        if not prompt:
+            raise ValueError("Prompt is missing from the task.")
+
         prompt_lower = prompt.lower()
 
         # --- Custom info about Kiarash Bashokian ---
@@ -54,19 +75,19 @@ class QAPairAgent(AgentBase):
         if is_about_kiarash(prompt_lower):
             # Skill/experience/education/language/contact detection
             if any(k in prompt_lower for k in ["skill", "skills"]):
-                return f"Kiarash Bashokian's skills: {skills}"
+                return {"result": f"Kiarash Bashokian's skills: {skills}"}
             elif any(k in prompt_lower for k in ["experience", "work", "background"]):
-                return f"Kiarash Bashokian's experience: {experience}"
+                return {"result": f"Kiarash Bashokian's experience: {experience}"}
             elif any(k in prompt_lower for k in ["education", "study", "degree"]):
-                return f"Kiarash Bashokian's education: {education}"
+                return {"result": f"Kiarash Bashokian's education: {education}"}
             elif any(k in prompt_lower for k in ["language", "languages"]):
-                return f"Languages: {languages}"
+                return {"result": f"Languages: {languages}"}
             elif any(k in prompt_lower for k in ["contact", "email", "phone"]):
-                return "Contact: kiarash@kiarashbashokian.com | +1 416-732-8976 | Toronto, ON M3J 1P3."
+                return {"result": "Contact: kiarash@kiarashbashokian.com | +1 416-732-8976 | Toronto, ON M3J 1P3."}
             elif any(k in prompt_lower for k in ["website", "profile", "portfolio", "linkedin", "github"]):
-                return "Websites & Profiles: https://www.linkedin.com/in/kiarashbashokian/ | http://www.kiarashbashokian.com | https://github.com/Ghosts6"
+                return {"result": "Websites & Profiles: https://www.linkedin.com/in/kiarashbashokian/ | http://www.kiarashbashokian.com | https://github.com/Ghosts6"}
             else:
-                return bio
+                return {"result": bio}
 
         # Add QA: 'ask What is AI? Answer: Artificial Intelligence.'
         if prompt_lower.startswith("ask ") and "answer:" in prompt_lower:
@@ -74,39 +95,37 @@ class QAPairAgent(AgentBase):
                 q, a = prompt.split("answer:", 1)
                 q = q.replace("ask", "", 1).strip()
                 a = a.strip()
-                AgentMemory.objects.update_or_create(
-                    agent_name=self.name, key=q, defaults={"value": a}
-                )
-                return f"Stored QA: '{q}' -> '{a}'"
+                await self._update_or_create_memory(q, a)
+                return {"result": f"Stored QA: '{q}' -> '{a}'"}
             except Exception:
-                return "Invalid format. Use: ask <question> Answer: <answer>"
+                return {"error": "Invalid format. Use: ask <question> Answer: <answer>"}
         # Update QA: 'update <question> to <new answer>'
         elif prompt_lower.startswith("update ") and " to " in prompt_lower:
             try:
                 _, rest = prompt.split("update", 1)
                 q, a = rest.split("to", 1)
                 q, a = q.strip(), a.strip()
-                mem = AgentMemory.objects.filter(agent_name=self.name, key=q).first()
+                mem = await self._get_memory(q)
                 if mem:
                     mem.value = a
-                    mem.save()
-                    return f"Updated answer for '{q}' to '{a}'"
-                return f"No QA found for '{q}'"
+                    await self._save_memory(mem)
+                    return {"result": f"Updated answer for '{q}' to '{a}'"}
+                return {"result": f"No QA found for '{q}'"}
             except Exception:
-                return "Invalid update format. Use: update <question> to <new answer>"
+                return {"error": "Invalid update format. Use: update <question> to <new answer>"}
         # Delete QA: 'delete <question>'
         elif prompt_lower.startswith("delete "):
             q = prompt[7:].strip()
-            deleted, _ = AgentMemory.objects.filter(agent_name=self.name, key=q).delete()
+            deleted, _ = await self._delete_memory(q)
             if deleted:
-                return f"Deleted QA for '{q}'"
-            return f"No QA found for '{q}'"
+                return {"result": f"Deleted QA for '{q}'"}
+            return {"result": f"No QA found for '{q}'"}
         # Get answer from memory or OpenAI
         else:
             q = prompt.strip()
-            mem = AgentMemory.objects.filter(agent_name=self.name, key=q).first()
+            mem = await self._get_memory(q)
             if mem:
-                return f"Answer: {mem.value}"
+                return {"result": f"Answer: {mem.value}"}
             # If not found, ask OpenAI and store
             try:
                 # Add full CV and links to system prompt for context
@@ -127,9 +146,10 @@ class QAPairAgent(AgentBase):
                     answer = msg.get('content')
                 else:
                     answer = msg.content
-                AgentMemory.objects.update_or_create(
-                    agent_name=self.name, key=q, defaults={"value": answer}
-                )
-                return f"Answer: {answer}"
+                await self._update_or_create_memory(q, answer)
+                return {"result": f"Answer: {answer}"}
             except Exception as e:
-                return f"Error: unable to get answer from OpenAI. {str(e)}"
+                return {"error": f"Error: unable to get answer from OpenAI. {str(e)}"}
+
+    def get_capabilities(self) -> List[str]:
+        return ["ask_question", "add_qa", "update_qa", "delete_qa", "kiarash_bashokian_info"]

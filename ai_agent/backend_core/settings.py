@@ -198,6 +198,7 @@ if IS_TESTING:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "test_db.sqlite3",
+            "TIME_ZONE": "UTC",
         }
     }
 else:

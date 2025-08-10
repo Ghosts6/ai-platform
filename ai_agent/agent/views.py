@@ -5,6 +5,8 @@ from .agent_manager import AgentRouter
 from core_services.models import AgentMemory, ChatSession, ChatMessage
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import AnonymousUser
+import asyncio
+from asgiref.sync import sync_to_async
 
 router = AgentRouter()
 
@@ -24,7 +26,7 @@ def respond_to_prompt(request):
             if auth_header and auth_header.startswith('Token '):
                 token_key = auth_header.split(' ')[1]
                 try:
-                    token = Token.objects.get(key=token_key)
+                    token = asyncio.run(sync_to_async(Token.objects.get)(key=token_key))
                     user = token.user
                 except Token.DoesNotExist:
                     pass
@@ -32,16 +34,16 @@ def respond_to_prompt(request):
             if not prompt:
                 return JsonResponse({'error': 'Prompt is required'}, status=400)
 
-            response_text = router.route(prompt)
+            response_text = asyncio.run(router.route(prompt))
 
             if user.is_authenticated:
                 if session_id:
-                    session = ChatSession.objects.get(id=session_id, user=user)
+                    session = asyncio.run(sync_to_async(ChatSession.objects.get)(id=session_id, user=user))
                 else:
-                    session = ChatSession.objects.create(user=user)
+                    session = asyncio.run(sync_to_async(ChatSession.objects.create)(user=user))
                 
-                ChatMessage.objects.create(session=session, sender='user', text=prompt)
-                ChatMessage.objects.create(session=session, sender='agent', text=response_text)
+                asyncio.run(sync_to_async(ChatMessage.objects.create)(session=session, sender='user', text=prompt))
+                asyncio.run(sync_to_async(ChatMessage.objects.create)(session=session, sender='agent', text=response_text))
                 
                 return JsonResponse({'response': response_text, 'session_id': session.id})
             else:

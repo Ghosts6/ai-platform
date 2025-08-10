@@ -2,6 +2,11 @@ import pytest
 from unittest.mock import patch, MagicMock
 from core_services.agents.teams import TeamsAgent
 
+import pytest
+from unittest.mock import patch, MagicMock
+from core_services.agents.teams import TeamsAgent
+import asyncio
+
 @pytest.mark.django_db
 def test_teams_agent_creates_event(monkeypatch):
     # Mock O365 Account and Calendar
@@ -26,9 +31,9 @@ def test_teams_agent_creates_event(monkeypatch):
         def schedule(self):
             return DummySchedule()
     monkeypatch.setattr("core_services.agents.teams.Account", lambda *a, **kw: DummyAccount())
-    agent = TeamsAgent("teams")
-    result = agent.handle("maintenance window on Friday")
-    assert "Created calendar event" in result
+    agent = TeamsAgent(agent_id="teams", name="teams")
+    result = asyncio.run(agent.process({"prompt": "maintenance window on Friday"}))
+    assert "Created calendar event" in result['result']
 
 @pytest.mark.django_db
 def test_teams_agent_no_action(monkeypatch):
@@ -45,6 +50,6 @@ def test_teams_agent_no_action(monkeypatch):
                     return DummyCalendar()
             return DummySchedule()
     monkeypatch.setattr("core_services.agents.teams.Account", lambda *a, **kw: DummyAccount())
-    agent = TeamsAgent("teams")
-    result = agent.handle("random unrelated prompt")
-    assert "No relevant action" in result
+    agent = TeamsAgent(agent_id="teams", name="teams")
+    result = asyncio.run(agent.process({"prompt": "random unrelated prompt"}))
+    assert "No relevant action" in result['result']

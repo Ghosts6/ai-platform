@@ -6,17 +6,18 @@ from core_services.agents.teams import TeamsAgent
 from core_services.models import AgentLog, AgentMemory
 import openai
 import os
+import asyncio
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class AgentRouter:
     def __init__(self):
         self.agent_classes = {
-            "summarize": lambda: SummarizerAgent("summarize", memory_backend=self.memory_backend),
-            "qa": lambda: QAPairAgent("qa"),
-            "email": lambda: EmailAgent("email"),
-            "excel": lambda: ExcelAgent("excel"),
-            "teams": lambda: TeamsAgent("teams"),
+            "summarize": lambda: SummarizerAgent(agent_id="summarize", name="summarize", memory_backend=self.memory_backend),
+            "qa": lambda: QAPairAgent(agent_id="qa", name="qa"),
+            "email": lambda: EmailAgent(agent_id="email", name="email"),
+            "excel": lambda: ExcelAgent(agent_id="excel", name="excel"),
+            "teams": lambda: TeamsAgent(agent_id="teams", name="teams"),
         }
         self.routing_rules = []
         self.register_agent("summarize", "summarize", keywords=["summarize", "summary"])
@@ -40,7 +41,7 @@ class AgentRouter:
         except AgentMemory.DoesNotExist:
             return None
 
-    def route(self, prompt: str) -> str:
+    async def route(self, prompt: str) -> str:
         prompt_lower = prompt.lower()
         best_agent_key = None
         best_score = 0
@@ -49,8 +50,13 @@ class AgentRouter:
             if score > best_score:
                 best_score = score
                 best_agent_key = agent_key
+        
         if best_agent_key:
             agent = self.agent_classes[best_agent_key]()
-            return agent.handle(prompt)
-        # Fallback: use QA agent for all other questions (AI-powered)
-        return self.agent_classes["qa"]().handle(prompt)
+        else:
+            # Fallback: use QA agent for all other questions (AI-powered)
+            agent = self.agent_classes["qa"]()
+
+        task = {"prompt": prompt}
+        result = await agent.process(task)
+        return result.get("result", result.get("error"))

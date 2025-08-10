@@ -9,17 +9,15 @@ from core_services.models import ChatSession, ChatMessage
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
+from asgiref.sync import sync_to_async
 
-@pytest.fixture
-def client():
-    return Client()
-
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @patch('core_services.agents.summarize.openai.chat.completions.create')
 @patch('core_services.agents.qa.openai.chat.completions.create')
 @patch('core_services.agents.email.openai.chat.completions.create')
 @patch('core_services.agents.excel.openai.chat.completions.create')
-def test_agent_respond_view(mock_excel, mock_email, mock_qa, mock_summarize, client):
+def test_agent_respond_view(mock_excel, mock_email, mock_qa, mock_summarize):
+    client = Client()
     mock_excel.return_value = MagicMock(choices=[MagicMock(message={'content': 'Excel result'})])
     mock_email.return_value = MagicMock(choices=[MagicMock(message={'content': 'Email result'})])
     mock_qa.return_value = MagicMock(choices=[MagicMock(message={'content': 'QA result'})])
@@ -48,12 +46,13 @@ def test_agent_respond_view(mock_excel, mock_email, mock_qa, mock_summarize, cli
     ("suggest reply to this email: ...", "EmailAgent:"),
     ("suggest formula to sum column A", "ExcelAgent:")
 ])
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @patch('core_services.agents.summarize.openai.chat.completions.create')
 @patch('core_services.agents.qa.openai.chat.completions.create')
 @patch('core_services.agents.email.openai.chat.completions.create')
 @patch('core_services.agents.excel.openai.chat.completions.create')
-def test_agent_response(mock_excel, mock_email, mock_qa, mock_summarize, client, prompt, expected_start):
+def test_agent_response(mock_excel, mock_email, mock_qa, mock_summarize, prompt, expected_start):
+    client = Client()
     mock_excel.return_value = MagicMock(choices=[MagicMock(message={'content': 'Excel result'})])
     mock_email.return_value = MagicMock(choices=[MagicMock(message={'content': 'Email result'})])
     mock_qa.return_value = MagicMock(choices=[MagicMock(message={'content': 'QA result'})])
@@ -67,8 +66,9 @@ def test_agent_response(mock_excel, mock_email, mock_qa, mock_summarize, client,
     assert res.status_code == 200
     assert res.json()['response'].startswith(expected_start)
 
-@pytest.mark.django_db
-def test_contact_message_human(client):
+@pytest.mark.django_db(transaction=True)
+def test_contact_message_human():
+    client = Client()
     data = {
         'name': 'Alice',
         'email': 'alice@example.com',
@@ -80,8 +80,9 @@ def test_contact_message_human(client):
     assert res.json()['message'] == 'Your message has been sent successfully!'
     assert ContactMessage.objects.filter(email='alice@example.com').exists()
 
-@pytest.mark.django_db
-def test_contact_message_bot(client):
+@pytest.mark.django_db(transaction=True)
+def test_contact_message_bot():
+    client = Client()
     data = {
         'name': 'Bot',
         'email': 'bot@example.com',
@@ -93,7 +94,7 @@ def test_contact_message_bot(client):
     assert res.json()['message'] == 'Bot detected.'
     assert not ContactMessage.objects.filter(email='bot@example.com').exists()
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_chat_history_view():
     user = User.objects.create_user(username='testuser', password='testpass')
     session1 = ChatSession.objects.create(user=user)
@@ -109,7 +110,7 @@ def test_chat_history_view():
     assert res.json()[0]['id'] == session2.id  # Most recent first
     assert res.json()[1]['id'] == session1.id
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_chat_session_view():
     user = User.objects.create_user(username='testuser', password='testpass')
     session = ChatSession.objects.create(user=user)
@@ -126,7 +127,7 @@ def test_chat_session_view():
     res2 = client.get(f'/api/core/chat/session/9999/')
     assert res2.status_code == 404
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_last_chat_session_view():
     user = User.objects.create_user(username='testuser', password='testpass')
     session1 = ChatSession.objects.create(user=user)
@@ -142,7 +143,7 @@ def test_last_chat_session_view():
     res2 = client.get('/api/core/chat/last/')
     assert res2.status_code == 404
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @patch('core_services.agents.qa.openai.chat.completions.create')
 def test_chat_session_created_for_authenticated_user(mock_create):
     # Mock OpenAI response
