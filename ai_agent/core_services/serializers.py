@@ -2,9 +2,10 @@ from rest_framework import serializers
 from .models import Agent, Task, AgentConfiguration, Workflow, WorkflowStep, ChatSession, ChatMessage, AgentLog, AgentMemory, ContactMessage
 
 class ChatSessionSerializer(serializers.ModelSerializer):
+    messages = ChatMessageSerializer(many=True, read_only=True)
     class Meta:
         model = ChatSession
-        fields = ['id', 'user', 'created_at']
+        fields = ['id', 'user', 'created_at', 'messages']
 
 class ChatMessageSerializer(serializers.ModelSerializer):
     class Meta:
