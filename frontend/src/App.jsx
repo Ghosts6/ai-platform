@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import React from 'react';
 import Home from './pages/Home';
-import Agent from './pages/Agent';
-import Chat from './pages/Chat';
+import ChatbotHome from './pages/ChatbotHome';
+import ChatbotChat from './pages/ChatbotChat';
+import Agents from './pages/Agents';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -20,10 +21,11 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/agent" element={<Agent />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/chat/history" element={<ChatHistory />} />
-        <Route path="/chat/:sessionId" element={<ChatSession />} />
+        <Route path="/chatbot" element={<ChatbotHome />} />
+        <Route path="/chatbot/new" element={<ChatbotChat />} />
+        <Route path="/agents" element={<Agents />} />
+        <Route path="/chatbot/history" element={<ChatHistory />} />
+        <Route path="/chatbot/session/:sessionId" element={<ChatSession />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />

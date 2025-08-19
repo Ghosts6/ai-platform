@@ -35,7 +35,8 @@ export default function Header() {
         </a>
         <nav className="hidden md:flex space-x-4 items-center">
           <a href="/" className="nav-link">Home</a>
-          <a href="/agent" className="nav-link">Agent</a>
+          <a href="/chatbot" className="nav-link">Chatbot</a>
+          <a href="/agents" className="nav-link">Agents</a>
           <a href="/readme" className="nav-link">README</a>
           <a href="/contact" className="nav-link">Contact</a>
           {isLoggedIn ? (
@@ -64,7 +65,8 @@ export default function Header() {
         </div>
         <nav className="flex flex-col p-4 space-y-4">
           <a href="/" className="nav-link-mobile" onClick={toggleMenu}>Home</a>
-          <a href="/agent" className="nav-link-mobile" onClick={toggleMenu}>Agent</a>
+          <a href="/chatbot" className="nav-link-mobile" onClick={toggleMenu}>Chatbot</a>
+          <a href="/agents" className="nav-link-mobile" onClick={toggleMenu}>Agents</a>
           <a href="/readme" className="nav-link-mobile" onClick={toggleMenu}>README</a>
           <a href="/contact" className="nav-link-mobile" onClick={toggleMenu}>Contact</a>
           {isLoggedIn ? (

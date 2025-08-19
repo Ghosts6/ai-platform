@@ -18,7 +18,7 @@ export default function Agent() {
 
   const handleHistoryClick = () => {
     if (isLoggedIn) {
-      navigate('/chat/history');
+      navigate('/chatbot/history');
     } else {
       navigate('/login');
     }
@@ -34,7 +34,7 @@ export default function Agent() {
         headers: { Authorization: `Token ${localStorage.getItem('token')}` }
       });
       if (res.data && res.data.id) {
-        navigate(`/chat/${res.data.id}`);
+        navigate(`/chatbot/session/${res.data.id}`);
       } else {
         Swal.fire({
           icon: 'info',
@@ -77,7 +77,7 @@ export default function Agent() {
                 <h2 className="text-2xl font-bold">Start Chat</h2>
               </div>
               <p className="text-accent/80">Start a new conversation with an AI agent to get assistance.</p>
-              <Link to="/chat" className="mt-4 w-full">
+              <Link to="/chatbot/new" className="mt-4 w-full">
                 <button className="w-full bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary/80 transition-colors duration-300">Start New Chat</button>
               </Link>
             </div>
