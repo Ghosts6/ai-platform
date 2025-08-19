@@ -1,47 +1,51 @@
 from .base import AgentBase
 from typing import Dict, Any, List, Optional
-import openai
 import os
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
+from O365 import Account
+from profiles.models import O365Token
+import datetime
 
 class ExcelAgent(AgentBase):
-    def __init__(self, agent_id: str, name: str, description: str = "", client=None):
+    def __init__(self, agent_id: str, name: str, description: str = "", user=None):
         super().__init__(agent_id, name, description)
-        self.client = client or openai.chat.completions
+        self.user = user
+        self.account = None
+        if self.user and self.user.is_authenticated:
+            try:
+                token_data = O365Token.objects.get(user=self.user)
+                if token_data.token_expiry > datetime.datetime.now(datetime.timezone.utc):
+                    credentials = (os.getenv("MS_CLIENT_ID"), os.getenv("MS_CLIENT_SECRET"))
+                    token = {
+                        'access_token': token_data.access_token,
+                        'refresh_token': token_data.refresh_token,
+                        'expires_at': token_data.token_expiry.timestamp()
+                    }
+                    self.account = Account(credentials, auth_flow_type='web', token=token)
+            except O365Token.DoesNotExist:
+                pass
 
     async def process(self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         prompt = task.get("prompt")
         if not prompt:
             raise ValueError("Prompt is missing from the task.")
 
-        try:
-            # Tool: Suggest formula, summarize, or extract data
-            if any(word in prompt.lower() for word in ["suggest formula", "generate formula", "excel formula"]):
-                system_prompt = "You are an AI spreadsheet assistant. Suggest an Excel formula for the user's request."
-            elif any(word in prompt.lower() for word in ["summarize", "analyze", "extract", "table summary"]):
-                system_prompt = "You are an AI spreadsheet assistant. Summarize or analyze the following spreadsheet data."
-            elif any(word in prompt.lower() for word in ["create new sheet", "new spreadsheet", "generate table"]):
-                system_prompt = "You are an AI spreadsheet assistant. Create a new spreadsheet or table based on the user's instructions."
-            else:
-                system_prompt = "You are an AI spreadsheet assistant. Help with any spreadsheet-related task."
-            
-            response = self.client.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.5,
-            )
-            choice = response.choices[0]
-            answer = choice.message.content if hasattr(choice.message, 'content') else choice.message['content']
-            return {"result": f"ExcelAgent: {answer}"}
-        except Exception as e:
-            return {"error": f"Error: unable to process spreadsheet task. {str(e)}"}
+        if not self.account or not self.account.is_authenticated:
+            return {"result": "ExcelAgent: Please authenticate with Microsoft to use Excel features. You can do so by visiting /ms_auth/login"}
+
+        # Example: Access OneDrive
+        if "onedrive" in prompt.lower() or "files" in prompt.lower():
+            storage = self.account.storage()
+            my_drive = storage.get_default_drive()
+            root_folder = my_drive.get_root_folder()
+            files = root_folder.get_items()
+            file_list = [item.name for item in files]
+            return {"result": f"ExcelAgent: Here are some of your files in OneDrive: {file_list}"}
+
+        return {"result": "ExcelAgent: I am connected to your Microsoft account. What would you like to do with Excel?"}
+
 
     def get_capabilities(self) -> List[str]:
-        return ["suggest_formula", "summarize_data", "create_sheet"]
+        return ["read_files_from_onedrive", "create_excel_file"]
 
 __all__ = ["ExcelAgent"]
 

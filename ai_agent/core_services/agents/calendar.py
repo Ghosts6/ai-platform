@@ -5,7 +5,7 @@ from O365 import Account
 from profiles.models import O365Token
 import datetime
 
-class EmailAgent(AgentBase):
+class CalendarAgent(AgentBase):
     def __init__(self, agent_id: str, name: str, description: str = "", user=None):
         super().__init__(agent_id, name, description)
         self.user = user
@@ -30,17 +30,20 @@ class EmailAgent(AgentBase):
             raise ValueError("Prompt is missing from the task.")
 
         if not self.account or not self.account.is_authenticated:
-            return {"result": "EmailAgent: Please authenticate with Microsoft to use email features. You can do so by visiting /ms_auth/login"}
+            return {"result": "CalendarAgent: Please authenticate with Microsoft to use calendar features. You can do so by visiting /ms_auth/login"}
 
-        # Example: Get number of unread emails
-        if "unread" in prompt.lower():
-            mailbox = self.account.mailbox()
-            inbox = mailbox.inbox_folder()
-            return {"result": f"EmailAgent: You have {inbox.unread_count} unread emails."}
+        # Example: List upcoming events
+        if "events" in prompt.lower() or "appointments" in prompt.lower():
+            schedule = self.account.schedule()
+            calendar = schedule.get_default_calendar()
+            events = calendar.get_events(query="is_organizer eq true", order_by="start/dateTime asc")
+            event_list = [f"{event.subject} at {event.start.strftime('%Y-%m-%d %H:%M')}" for event in events]
+            return {"result": f"CalendarAgent: Here are some of your upcoming events: {event_list}"}
 
-        return {"result": "EmailAgent: I am connected to your email account. What would you like to do?"}
+        return {"result": "CalendarAgent: I am connected to your calendar. What would you like to do?"}
 
 
     def get_capabilities(self) -> List[str]:
-        return ["read_unread_emails", "send_email"]
+        return ["list_events", "create_event"]
 
+__all__ = ["CalendarAgent"]

@@ -15,6 +15,8 @@ urlpatterns = [
     path('core/', include('core_services.urls')),
     path('scheduler/', include('scheduler.urls')),
     path('utils/', include('shared_utils.urls')),
+    path('ms_auth/', include('ms_auth.urls')),
+    path('api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('', views.index, name='home_index'),
 
     # Error handling

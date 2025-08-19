@@ -34,7 +34,7 @@ def respond_to_prompt(request):
             if not prompt:
                 return JsonResponse({'error': 'Prompt is required'}, status=400)
 
-            response_text = asyncio.run(router.route(prompt))
+            response_text = asyncio.run(router.route(prompt, user=user))
 
             if user.is_authenticated:
                 if session_id:

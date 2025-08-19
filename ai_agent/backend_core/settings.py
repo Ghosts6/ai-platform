@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_rest_passwordreset",
+    "ms_auth",
 ]
 
 REST_FRAMEWORK = {
@@ -197,8 +198,7 @@ if IS_TESTING:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "test_db.sqlite3",
-            "TIME_ZONE": "UTC",
+            "NAME": ":memory:",
         }
     }
 else:
