@@ -61,7 +61,7 @@ const ChatHistory = () => {
                     <div className="flex flex-col items-center justify-center py-20 animate-fadeIn">
                       <FaComments className="text-primary text-6xl mb-6 opacity-80 animate-fadeIn drop-shadow-lg" />
                       <p className="text-accent/60 text-xl mb-2">No chat history found.</p>
-                      <Link to="/chat">
+                      <Link to="/chatbot/new">
                         <button className="mt-4 px-8 py-3 rounded-lg bg-primary text-background font-bold text-lg shadow-lg hover:bg-primary-hover transition-transform hover:scale-105">Start a New Chat</button>
                       </Link>
                     </div>

@@ -45,25 +45,29 @@ class AgentRouter:
         except AgentMemory.DoesNotExist:
             return None
 
-    async def route(self, prompt: str, user=None) -> str:
-        prompt_lower = prompt.lower()
-        best_agent_key = None
-        best_score = 0
-        for keywords, agent_key in self.routing_rules:
-            score = sum(1 for word in keywords if word in prompt_lower)
-            if score > best_score:
-                best_score = score
-                best_agent_key = agent_key
+    async def route(self, prompt: str, user=None, agent_key=None, file_path=None) -> str:
+        best_agent_key = agent_key
+
+        if not best_agent_key:
+            prompt_lower = prompt.lower()
+            best_score = 0
+            for keywords, key in self.routing_rules:
+                score = sum(1 for word in keywords if word in prompt_lower)
+                if score > best_score:
+                    best_score = score
+                    best_agent_key = key
         
         agent_class = self.agent_classes.get(best_agent_key) if best_agent_key else self.agent_classes["qa"]
         
+        agent_params = {"agent_id": best_agent_key, "name": best_agent_key}
         if best_agent_key in ["email", "excel", "teams", "calendar"]:
-             agent = agent_class(agent_id=best_agent_key, name=best_agent_key, user=user)
+            agent_params["user"] = user
+            if file_path:
+                agent_params["file_path"] = file_path
         elif best_agent_key == "summarize":
-            agent = agent_class(agent_id=best_agent_key, name=best_agent_key, memory_backend=self.memory_backend)
-        else:
-            agent = agent_class(agent_id="qa", name="qa")
+            agent_params["memory_backend"] = self.memory_backend
 
+        agent = agent_class(**agent_params)
 
         task = {"prompt": prompt}
         result = await agent.process(task)

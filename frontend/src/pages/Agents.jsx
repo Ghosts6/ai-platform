@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import Header from '../components/Header';
@@ -13,6 +13,7 @@ export default function Agents() {
   const [userQuery, setUserQuery] = useState('');
   const [isQueryLoading, setIsQueryLoading] = useState(false);
   const navigate = useNavigate();
+  const interactionRef = useRef(null);
 
   // Agent definitions based on your backend agent system
   const agentDefinitions = {
@@ -88,6 +89,9 @@ export default function Agents() {
   const handleAgentSelect = (agent) => {
     setSelectedAgent(agent);
     setUserQuery('');
+    setTimeout(() => {
+      interactionRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
   const handleQuerySubmit = async (e) => {
@@ -96,8 +100,8 @@ export default function Agents() {
 
     setIsQueryLoading(true);
     try {
-      // Navigate to chat with the selected agent
-      navigate('/chat', { 
+      // Navigate to agent with the selected agent
+      navigate('/agent', { 
         state: { 
           agentId: selectedAgent.id,
           agentName: selectedAgent.name,
@@ -112,7 +116,7 @@ export default function Agents() {
   };
 
   const startGeneralChat = () => {
-    navigate('/chat', { 
+    navigate('/chatbot/new', { 
       state: { 
         agentId: 'general',
         agentName: 'AI Manager',
@@ -134,10 +138,10 @@ export default function Agents() {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'active': return '🟢';
-      case 'inactive': return '⚪';
+      case 'inactive': return '⚪️';
       case 'error': return '🔴';
       case 'processing': return '🟡';
-      default: return '⚪';
+      default: return '⚪️';
     }
   };
 
@@ -251,7 +255,7 @@ export default function Agents() {
 
           {/* Interaction Section */}
           {selectedAgent && (
-            <div className="bg-surface/50 backdrop-blur-sm p-6 rounded-xl border border-primary/20">
+            <div ref={interactionRef} className="bg-surface/50 backdrop-blur-sm p-6 rounded-xl border border-primary/20">
               <div className="text-center mb-6">
                 <h2 className="text-2xl font-bold text-primary mb-2">
                   Interact with {selectedAgent.name}

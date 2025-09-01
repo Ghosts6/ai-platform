@@ -7,6 +7,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import AnonymousUser
 import asyncio
 from asgiref.sync import sync_to_async
+import os
+import uuid
 
 router = AgentRouter()
 
@@ -17,9 +19,29 @@ def index(request):
 def respond_to_prompt(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            prompt = data.get('prompt', '')
-            session_id = data.get('session_id')
+            prompt = ''
+            session_id = None
+            agent_key = None
+            file_path = None
+            
+            if 'multipart/form-data' in request.content_type:
+                prompt = request.POST.get('prompt', '')
+                session_id = request.POST.get('session_id')
+                agent_key = request.POST.get('agent')
+                if 'file' in request.FILES:
+                    uploaded_file = request.FILES['file']
+                    temp_dir = '/tmp'
+                    if not os.path.exists(temp_dir):
+                        os.makedirs(temp_dir)
+                    file_path = os.path.join(temp_dir, str(uuid.uuid4()))
+                    with open(file_path, 'wb+') as destination:
+                        for chunk in uploaded_file.chunks():
+                            destination.write(chunk)
+            else:
+                data = json.loads(request.body)
+                prompt = data.get('prompt', '')
+                session_id = data.get('session_id')
+                agent_key = data.get('agent')
 
             user = AnonymousUser()
             auth_header = request.META.get('HTTP_AUTHORIZATION')
@@ -34,7 +56,10 @@ def respond_to_prompt(request):
             if not prompt:
                 return JsonResponse({'error': 'Prompt is required'}, status=400)
 
-            response_text = asyncio.run(router.route(prompt, user=user))
+            response_text = asyncio.run(router.route(prompt, user=user, agent_key=agent_key, file_path=file_path))
+
+            if file_path and os.path.exists(file_path):
+                os.remove(file_path)
 
             if user.is_authenticated:
                 if session_id:
@@ -50,6 +75,8 @@ def respond_to_prompt(request):
                 return JsonResponse({'response': response_text})
 
         except Exception as e:
+            if 'file_path' in locals() and file_path and os.path.exists(file_path):
+                os.remove(file_path)
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 

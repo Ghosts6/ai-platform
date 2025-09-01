@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import ChatbotHome from './pages/ChatbotHome';
 import ChatbotChat from './pages/ChatbotChat';
 import Agents from './pages/Agents';
+import Agent from './pages/Agent';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -24,6 +25,7 @@ function App() {
         <Route path="/chatbot" element={<ChatbotHome />} />
         <Route path="/chatbot/new" element={<ChatbotChat />} />
         <Route path="/agents" element={<Agents />} />
+        <Route path="/agent" element={<Agent />} />
         <Route path="/chatbot/history" element={<ChatHistory />} />
         <Route path="/chatbot/session/:sessionId" element={<ChatSession />} />
         <Route path="/login" element={<Login />} />

@@ -29,8 +29,6 @@ urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
 
     path('README.md', views.ReadmeView.as_view(), name='readme_file'),
-    # catch all react patterns - must be last
-    re_path(r'^.*$', home_views.index, name='home'),
 ]
 
 # Serve static files in development
@@ -38,13 +36,9 @@ if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# Serve the frontend app in production
-if not settings.DEBUG:
-    urlpatterns += [
-        path('', TemplateView.as_view(template_name='index.html')),
-        path('<path:path>', TemplateView.as_view(template_name='index.html')),
-    ]
-
 # Custom error handlers
 handler404 = 'django.views.defaults.page_not_found'
 handler500 = 'django.views.defaults.server_error'
+
+# Catch-all for React routing
+urlpatterns.append(re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")))

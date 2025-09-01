@@ -79,7 +79,7 @@ export default function AgentDemo() {
   };
 
   const startExample = (example) => {
-    navigate('/chat', {
+    navigate('/agent', {
       state: {
         agentId: example.id,
         agentName: example.agent,
@@ -89,7 +89,7 @@ export default function AgentDemo() {
   };
 
   const startGeneralChat = () => {
-    navigate('/chat', {
+    navigate('/chatbot/new', {
       state: {
         agentId: 'general',
         agentName: 'AI Manager',
