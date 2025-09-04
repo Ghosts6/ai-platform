@@ -18,6 +18,11 @@ from core_services.agents.excel import ExcelAgent
 from core_services.agents.calendar import CalendarAgent
 from core_services.agents.teams import TeamsAgent
 
+import io
+import os
+import tempfile
+import pandas as pd
+
 @pytest.mark.django_db(transaction=True)
 def test_contact_message_human(client):
     data = {
@@ -216,7 +221,7 @@ def test_excel_agent_authenticated(user):
         mock_instance.is_authenticated = True
         
         agent = ExcelAgent(agent_id='excel', name='excel', user=user)
-        
+        asyncio.run(agent._ensure_account())
         assert agent.account is not None
 
 @pytest.mark.django_db(transaction=True)
@@ -346,3 +351,66 @@ def test_teams_agent_no_action(monkeypatch):
     agent = TeamsAgent(agent_id="teams", name="teams")
     result = asyncio.run(agent.process({"prompt": "random unrelated prompt"}))
     assert "No relevant action" in result['result']
+
+
+@pytest.mark.django_db(transaction=True)
+def test_chat_history_requires_auth(client):
+    url = "/api/core/chat/history/"
+    res = client.get(url)
+    assert res.status_code in (401, 403)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_chat_session_requires_auth(client):
+    url = "/api/core/chat/session/123/"
+    res = client.get(url)
+    assert res.status_code in (401, 403)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_agent_respond_excel_describe_with_csv(client, user):
+    # Prepare CSV
+    df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+    tmp_dir = tempfile.mkdtemp()
+    csv_path = os.path.join(tmp_dir, "test_data.csv")
+    df.to_csv(csv_path, index=False)
+
+    # Auth token
+    token = Token.objects.create(user=user)
+
+    with open(csv_path, 'rb') as f:
+        url = "/api/agent/respond/"
+        data = {
+            'prompt': 'describe',
+            'agent': 'excel',
+            'file': f,
+        }
+        res = client.post(url, data, format='multipart', HTTP_AUTHORIZATION=f"Token {token.key}")
+    assert res.status_code == 200, res.content
+    payload = res.json()
+    assert 'response' in payload
+    assert 'ExcelAgent' in payload['response']
+    assert 'describe' in payload['response'].lower() or 'description' in payload['response'].lower()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_excel_agent_summarize_fallback_without_openai_key(user):
+    # Ensure OPENAI_API_KEY is not set
+    if 'OPENAI_API_KEY' in os.environ:
+        del os.environ['OPENAI_API_KEY']
+
+    # Create temp CSV
+    df = pd.DataFrame({"Name": ["Alice", "Bob"], "Email": ["a@example.com", "b@example.com"]})
+    tmp_fd, tmp_path = tempfile.mkstemp(suffix=".csv")
+    os.close(tmp_fd)
+    df.to_csv(tmp_path, index=False)
+
+    try:
+        agent = ExcelAgent(agent_id='excel', name='excel', user=user, file_path=tmp_path)
+        result = asyncio.run(agent.process(task={'prompt': 'summarize this file'}))
+        assert 'Columns' in result['result'] and 'Rows' in result['result']
+    finally:
+        try:
+            os.remove(tmp_path)
+        except Exception:
+            pass

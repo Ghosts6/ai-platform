@@ -87,11 +87,7 @@ export default function Agents() {
   }, []);
 
   const handleAgentSelect = (agent) => {
-    setSelectedAgent(agent);
-    setUserQuery('');
-    setTimeout(() => {
-      interactionRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+    navigate('/agent', { state: { agentId: agent.id, agentName: agent.name } });
   };
 
   const handleQuerySubmit = async (e) => {
@@ -123,6 +119,15 @@ export default function Agents() {
         initialQuery: ''
       }
     });
+  };
+
+  const handleViewHistory = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    navigate('/agent/history');
   };
 
   const getStatusColor = (status) => {
@@ -167,12 +172,20 @@ export default function Agents() {
         <div className="w-full max-w-6xl mx-auto space-y-8">
           {/* Header Section */}
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-display font-extrabold text-primary mb-4 tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-display font-extrabold text-primary mb-2 tracking-tight">
               AI Agents
             </h1>
-            <p className="text-lg text-accent/80 max-w-2xl mx-auto">
+            <p className="text-lg text-accent/80 max-w-2xl mx-auto mb-4">
               Explore and interact with specialized AI agents designed to handle specific tasks and workflows.
             </p>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={handleViewHistory}
+                className="px-5 py-2 rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+              >
+                View History
+              </button>
+            </div>
           </div>
 
           {/* Agent Grid */}
@@ -301,6 +314,14 @@ export default function Agents() {
               <p className="text-accent/80 mb-6 max-w-2xl mx-auto">
                 Not sure which agent to use? Our intelligent routing system will automatically detect the best agent for your request based on keywords and context.
               </p>
+              <div className="flex gap-3 justify-center mb-4">
+                <button
+                  onClick={() => navigate('/agent')}
+                  className="px-5 py-3 rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                >
+                  Open Agent Workspace
+                </button>
+              </div>
               <button
                 onClick={startGeneralChat}
                 className="bg-gradient-to-r from-primary to-primary-hover text-white font-bold py-3 px-8 rounded-lg hover:from-primary-hover hover:to-primary transition-all duration-300 shadow-lg hover:shadow-primary/25 transform hover:scale-105 flex items-center gap-2 mx-auto"

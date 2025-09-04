@@ -43,7 +43,7 @@ const ChatHistory = () => {
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fadeIn">
                       {sessions.map((session, idx) => (
                         <li key={session.id} className="chat-history-card group">
-                          <Link to={`/chat/${session.id}`} className="block h-full w-full">
+                          <Link to={`/chatbot/session/${session.id}`} className="block h-full w-full">
                             <div className="flex flex-col h-full p-6 rounded-2xl shadow-xl bg-surface/80 border border-primary/20 group-hover:scale-[1.03] group-hover:shadow-primary/40 transition-all duration-300 ease-in-out cursor-pointer relative overflow-hidden">
                               <div className="flex items-center gap-3 mb-2">
                                 <FaComments className="text-primary text-2xl animate-fadeIn" />

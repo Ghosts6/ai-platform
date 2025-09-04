@@ -16,6 +16,7 @@ import Contact from './pages/Contact';
 
 import ChatHistory from './pages/ChatHistory';
 import ChatSession from './pages/ChatSession';
+import AgentHistory from './pages/AgentHistory';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/chatbot/new" element={<ChatbotChat />} />
         <Route path="/agents" element={<Agents />} />
         <Route path="/agent" element={<Agent />} />
+        <Route path="/agent/history" element={<AgentHistory />} />
         <Route path="/chatbot/history" element={<ChatHistory />} />
         <Route path="/chatbot/session/:sessionId" element={<ChatSession />} />
         <Route path="/login" element={<Login />} />

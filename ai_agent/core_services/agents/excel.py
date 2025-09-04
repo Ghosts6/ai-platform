@@ -5,6 +5,20 @@ from O365 import Account
 from profiles.models import O365Token
 import datetime
 import pandas as pd
+import tempfile
+from asgiref.sync import sync_to_async
+
+try:
+    from openai import OpenAI
+except Exception:
+    OpenAI = None
+
+# Optional dependency checks
+try:
+    import openpyxl  # noqa: F401
+    OPENPYXL_AVAILABLE = True
+except Exception:
+    OPENPYXL_AVAILABLE = False
 
 class ExcelAgent(AgentBase):
     def __init__(self, agent_id: str, name: str, description: str = "", user=None, file_path=None):
@@ -12,36 +26,139 @@ class ExcelAgent(AgentBase):
         self.user = user
         self.file_path = file_path
         self.account = None
-        if self.user and self.user.is_authenticated:
+
+    async def _ensure_account(self):
+        if self.account is not None:
+            return
+        if not self.user or not getattr(self.user, 'is_authenticated', False):
+            return
+        try:
+            token_data = await sync_to_async(O365Token.objects.get)(user=self.user)
+            if token_data.token_expiry > datetime.datetime.now(datetime.timezone.utc):
+                credentials = (os.getenv("MS_CLIENT_ID"), os.getenv("MS_CLIENT_SECRET"))
+                token = {
+                    'access_token': token_data.access_token,
+                    'refresh_token': token_data.refresh_token,
+                    'expires_at': token_data.token_expiry.timestamp()
+                }
+                self.account = Account(credentials, auth_flow_type='web', token=token)
+        except O365Token.DoesNotExist:
+            pass
+
+    def _read_dataframe(self, path: str) -> pd.DataFrame:
+        lower = path.lower()
+        if lower.endswith('.csv'):
+            return pd.read_csv(path)
+        if lower.endswith('.tsv') or lower.endswith('.tab'):
+            return pd.read_csv(path, sep='\t')
+        if lower.endswith('.json'):
+            return pd.read_json(path)
+        if lower.endswith('.xlsx'):
+            if not OPENPYXL_AVAILABLE:
+                raise RuntimeError("Missing dependency: openpyxl is required to read .xlsx files. Please install openpyxl.")
+            return pd.read_excel(path, engine='openpyxl')
+        if lower.endswith('.xls'):
             try:
-                token_data = O365Token.objects.get(user=self.user)
-                if token_data.token_expiry > datetime.datetime.now(datetime.timezone.utc):
-                    credentials = (os.getenv("MS_CLIENT_ID"), os.getenv("MS_CLIENT_SECRET"))
-                    token = {
-                        'access_token': token_data.access_token,
-                        'refresh_token': token_data.refresh_token,
-                        'expires_at': token_data.token_expiry.timestamp()
-                    }
-                    self.account = Account(credentials, auth_flow_type='web', token=token)
-            except O365Token.DoesNotExist:
-                pass
+                return pd.read_excel(path)
+            except Exception as e:
+                raise RuntimeError(f"Unable to read .xls file. Install xlrd (older) or convert to .xlsx. Details: {e}")
+        return pd.read_csv(path)
+
+    def _df_context(self, df: pd.DataFrame, max_rows: int = 5) -> str:
+        sample = df.head(max_rows)
+        describe = None
+        try:
+            describe = df.describe(include='all').to_string()
+        except Exception:
+            describe = ""
+        context_parts = [
+            f"Columns: {list(df.columns)}",
+            f"Shape: {df.shape}",
+            f"Head:\n{sample.to_string()}",
+            f"Describe:\n{describe}" if describe else ""
+        ]
+        return "\n\n".join([p for p in context_parts if p])
+
+    def _count_users(self, df: pd.DataFrame) -> int:
+        cols_lower = {c.lower(): c for c in df.columns}
+        if 'email' in cols_lower:
+            col = cols_lower['email']
+            return int(df[col].dropna().nunique())
+        first = cols_lower.get('first name') or cols_lower.get('firstname') or cols_lower.get('first')
+        last = cols_lower.get('last name') or cols_lower.get('lastname') or cols_lower.get('last')
+        if first and last:
+            return int(df[[first, last]].dropna().drop_duplicates().shape[0])
+        try:
+            if df.shape[1] <= 3:
+                return int(df.dropna().drop_duplicates().shape[0])
+        except Exception:
+            pass
+        return int(df.shape[0])
+
+    def _llm_answer(self, question: str, df: pd.DataFrame) -> Optional[str]:
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key or OpenAI is None:
+            return None
+        try:
+            client = OpenAI()
+            context = self._df_context(df)
+            system = (
+                "You are a helpful data analyst. You will be given a short context with table columns, "
+                "shape, a sample of rows, and statistical description. Answer the user's question strictly "
+                "based on this context. If the answer is ambiguous, state assumptions succinctly. Keep the answer concise."
+            )
+            user_msg = f"Context (from uploaded file):\n\n{context}\n\nQuestion: {question}"
+            resp = client.chat.completions.create(
+                model=os.getenv('OPENAI_MODEL', 'gpt-4o-mini'),
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user_msg},
+                ],
+                temperature=0.2,
+                max_tokens=400,
+            )
+            return resp.choices[0].message.content.strip()
+        except Exception:
+            return None
 
     async def _process_local_file(self, prompt: str) -> Dict[str, Any]:
         try:
-            if self.file_path.endswith('.csv'):
-                df = pd.read_csv(self.file_path)
-            elif self.file_path.endswith(('.xls', '.xlsx')):
-                df = pd.read_excel(self.file_path)
-            else:
-                return {"result": "ExcelAgent: Unsupported file type. Please upload a CSV or Excel file."}
+            df = self._read_dataframe(self.file_path)
 
-            # Basic analysis for demonstration
-            if "describe" in prompt.lower():
-                return {"result": f"ExcelAgent: Here is a description of the data:\n{df.describe().to_string()}"}
-            if "head" in prompt.lower():
+            prompt_lower = prompt.lower()
+            if "convert to xlsx" in prompt_lower or "to xlsx" in prompt_lower:
+                with tempfile.NamedTemporaryFile(prefix="converted_", suffix=".xlsx", delete=False) as tmp:
+                    out_path = tmp.name
+                try:
+                    df.to_excel(out_path, index=False)
+                    return {"result": f"ExcelAgent: Converted file saved to {out_path}."}
+                except Exception as e:
+                    return {"error": f"ExcelAgent: Conversion failed: {e}"}
+
+            if "summarize" in prompt_lower or "summarise" in prompt_lower or "summary" in prompt_lower:
+                llm = self._llm_answer("Provide a brief, bullet-point summary of this dataset.", df)
+                if llm:
+                    return {"result": f"ExcelAgent (summary):\n{llm}"}
+                return {"result": f"ExcelAgent: Columns {list(df.columns)} | Rows {len(df)}"}
+
+            if ("how many" in prompt_lower and ("user" in prompt_lower or "people" in prompt_lower or "rows" in prompt_lower)) or ("count" in prompt_lower and "user" in prompt_lower):
+                count = self._count_users(df)
+                return {"result": f"ExcelAgent: Estimated number of users: {count}"}
+
+            if "describe" in prompt_lower:
+                return {"result": f"ExcelAgent: Here is a description of the data:\n{df.describe(include='all').to_string()}"}
+            if "head" in prompt_lower or "preview" in prompt_lower:
                 return {"result": f"ExcelAgent: Here are the first 5 rows of the data:\n{df.head().to_string()}"}
+            if "columns" in prompt_lower or "schema" in prompt_lower:
+                return {"result": f"ExcelAgent: Columns detected: {list(df.columns)}"}
+            if "rows" in prompt_lower or "count" in prompt_lower:
+                return {"result": f"ExcelAgent: Row count: {len(df)}"}
 
-            return {"result": "ExcelAgent: I have loaded the file. What would you like me to do with it? Ask me to 'describe' the data or show the 'head'."}
+            llm_answer = self._llm_answer(prompt, df)
+            if llm_answer:
+                return {"result": f"ExcelAgent: {llm_answer}"}
+
+            return {"result": "ExcelAgent: I have loaded the file. You can ask me to 'describe', show the 'head', list 'columns', 'rows' count, 'convert to xlsx', or ask questions in natural language (requires OPENAI_API_KEY)."}
         except Exception as e:
             return {"error": f"ExcelAgent: Error processing file: {e}"}
 
@@ -53,10 +170,10 @@ class ExcelAgent(AgentBase):
         if self.file_path:
             return await self._process_local_file(prompt)
 
+        await self._ensure_account()
         if not self.account or not self.account.is_authenticated:
             return {"result": "ExcelAgent: Please authenticate with Microsoft to use Excel features. You can do so by visiting /ms_auth/login"}
 
-        # Example: Access OneDrive
         if "onedrive" in prompt.lower() or "files" in prompt.lower():
             storage = self.account.storage()
             my_drive = storage.get_default_drive()

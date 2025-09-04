@@ -5,8 +5,7 @@ from .agent_manager import AgentRouter
 from core_services.models import AgentMemory, ChatSession, ChatMessage
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import AnonymousUser
-import asyncio
-from asgiref.sync import sync_to_async
+from asgiref.sync import async_to_sync
 import os
 import uuid
 
@@ -33,7 +32,11 @@ def respond_to_prompt(request):
                     temp_dir = '/tmp'
                     if not os.path.exists(temp_dir):
                         os.makedirs(temp_dir)
-                    file_path = os.path.join(temp_dir, str(uuid.uuid4()))
+                    original_name = getattr(uploaded_file, 'name', '') or ''
+                    _, ext = os.path.splitext(original_name)
+                    # Default to .xlsx if no extension is provided
+                    safe_ext = ext if ext else '.xlsx'
+                    file_path = os.path.join(temp_dir, f"{uuid.uuid4()}{safe_ext}")
                     with open(file_path, 'wb+') as destination:
                         for chunk in uploaded_file.chunks():
                             destination.write(chunk)
@@ -48,7 +51,7 @@ def respond_to_prompt(request):
             if auth_header and auth_header.startswith('Token '):
                 token_key = auth_header.split(' ')[1]
                 try:
-                    token = asyncio.run(sync_to_async(Token.objects.get)(key=token_key))
+                    token = Token.objects.get(key=token_key)
                     user = token.user
                 except Token.DoesNotExist:
                     pass
@@ -56,19 +59,19 @@ def respond_to_prompt(request):
             if not prompt:
                 return JsonResponse({'error': 'Prompt is required'}, status=400)
 
-            response_text = asyncio.run(router.route(prompt, user=user, agent_key=agent_key, file_path=file_path))
+            response_text = async_to_sync(router.route)(prompt, user=user, agent_key=agent_key, file_path=file_path)
 
             if file_path and os.path.exists(file_path):
                 os.remove(file_path)
 
             if user.is_authenticated:
                 if session_id:
-                    session = asyncio.run(sync_to_async(ChatSession.objects.get)(id=session_id, user=user))
+                    session = ChatSession.objects.get(id=session_id, user=user)
                 else:
-                    session = asyncio.run(sync_to_async(ChatSession.objects.create)(user=user))
+                    session = ChatSession.objects.create(user=user)
                 
-                asyncio.run(sync_to_async(ChatMessage.objects.create)(session=session, sender='user', text=prompt))
-                asyncio.run(sync_to_async(ChatMessage.objects.create)(session=session, sender='agent', text=response_text))
+                ChatMessage.objects.create(session=session, sender='user', text=prompt)
+                ChatMessage.objects.create(session=session, sender='agent', text=response_text)
                 
                 return JsonResponse({'response': response_text, 'session_id': session.id})
             else:
