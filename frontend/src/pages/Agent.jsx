@@ -212,8 +212,8 @@ const Agent = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background text-accent font-body">
       <Header />
-      <main className="flex-1 flex w-full">
-        <aside className="w-1/4 max-w-xs bg-surface/30 p-4 border-r border-primary/20">
+      <main className="flex-1 flex flex-col md:flex-row w-full">
+        <aside className="w-full md:w-1/4 md:max-w-xs bg-surface/30 p-4 md:border-r border-primary/20">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-accent/70">Agents</span>
             <button
@@ -250,7 +250,7 @@ const Agent = () => {
             ))}
           </ul>
         </aside>
-        <section className="w-3/4 p-8 overflow-y-auto">
+        <section className="w-full md:w-3/4 p-8 overflow-y-auto">
           {selectedAgent ? (
             <div className="animate-fade-in">
               <h1 className="text-4xl font-display font-extrabold text-primary mb-2">{selectedAgent.name}</h1>
