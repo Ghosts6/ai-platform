@@ -24,6 +24,7 @@ This project is designed for extensibility, allowing you to create domain-specif
 - **Backend**: Python 3.11+, Django 4.x, Django REST Framework
 - **Frontend**: React, React Router, Axios, Tailwind CSS
 - **AI & LLM**: OpenAI API (ChatGPT, GPT-4)
+- **Containerization**: Docker, Docker Compose
 - **Database**: PostgreSQL (SQLite supported for development)
 - **Background Tasks**: Celery with Redis broker, APScheduler for timed jobs
 - **Testing**: pytest, pytest-django, GitHub Actions CI pipeline
@@ -40,6 +41,7 @@ This project is designed for extensibility, allowing you to create domain-specif
 │   ├── agent/         → Core LLM agent logic and tasks
 │   ├── core_services/ → Shared models, services, and agent definitions
 │   ├── scheduler/     → Celery tasks and scheduled jobs
+│   ├── requirements.txt → Python dependencies
 │   └── ...
 ├── frontend/          → React frontend application
 │   ├── src/           → Source code for the React app
@@ -47,8 +49,7 @@ This project is designed for extensibility, allowing you to create domain-specif
 │   │   ├── pages/       → Application pages
 │   │   └── api/         → API integration (Axios)
 │   └── public/        → Static assets and index.html
-├── .env               → Environment configuration
-├── requirements.txt   → Python dependencies
+├── docker-compose.yml → Docker service definitions
 └── package.json       → Frontend dependencies
 ```
 
@@ -82,7 +83,7 @@ This project is designed for extensibility, allowing you to create domain-specif
     ```
 3.  **Install Python dependencies**:
     ```bash
-    pip install -r requirements.txt
+    pip install -r ai_agent/requirements.txt
     ```
 4.  **Set up your environment variables**:
     - Create a `.env` file in the `ai_agent` directory.
@@ -111,6 +112,68 @@ This project is designed for extensibility, allowing you to create domain-specif
     npm start
     ```
     The frontend will be available at `http://localhost:3000` and will proxy API requests to the Django backend.
+
+---
+
+## 🐳 Running with Docker
+
+This project is fully containerized using Docker and Docker Compose, providing a consistent and reproducible environment.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### First-Time Setup
+
+1.  **Environment Variables**: Ensure you have a valid `.env` file inside the `ai_agent` directory. You can use the `Example .env File` section as a template. The Docker setup will use these variables to configure the services.
+
+2.  **Build and Start Services**: Run the following command from the project root. This will build the Docker images for the frontend and backend, create the database, and start all services.
+    ```bash
+    sudo docker-compose up --build
+    ```
+
+3.  **Run Database Migrations**: The first time you start the application, the database will be empty. The new configuration automatically runs migrations on startup, so you no longer need to do this manually.
+
+After these steps, the application will be running and accessible at `http://localhost`.
+
+### Everyday Usage
+
+-   **Start all services**:
+    ```bash
+    sudo docker-compose up
+    ```
+
+-   **Stop all services**:
+    ```bash
+    sudo docker-compose down
+    ```
+
+### Helpful Docker Commands
+
+-   **Rebuild and Start**: If you make changes to the `Dockerfile` or want to force a rebuild of your images:
+    ```bash
+    sudo docker-compose up --build
+    ```
+
+-   **View Logs**: To view the logs from all running services in real-time:
+    ```bash
+    sudo docker-compose logs -f
+    ```
+    To follow the logs for a specific service (e.g., the backend):
+    ```bash
+    sudo docker-compose logs -f backend
+    ```
+
+-   **Run Management Commands**: To run any Django `manage.py` command inside the backend container (e.g., to create a superuser):
+    ```bash
+    sudo docker-compose exec backend python manage.py createsuperuser
+    ```
+
+-   **Clean Up Unused Images**: To safely remove old, dangling images and free up disk space:
+    ```bash
+    sudo docker image prune
+    ```
 
 ---
 
@@ -189,4 +252,3 @@ MS_REDIRECT_URI=http://localhost:8000/msauth/callback/
 # Test Mode
 TEST_MODE=True
 ```
-

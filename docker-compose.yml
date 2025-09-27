@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    container_name: ai_platform_db
+    environment:
+      - POSTGRES_DB=ai_platform_db
+      - POSTGRES_USER=ai_user
+      - POSTGRES_PASSWORD=K1234567b
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5433:5432"
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./ai_agent/Dockerfile
+    container_name: ai_platform_backend
+    volumes:
+      - ./ai_agent:/app/ai_agent
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SECRET_KEY=dummy-secret-key-for-dev
+      - DJANGO_DEBUG=True
+      - DATABASE_URL=postgres://ai_user:K1234567b@db:5432/ai_platform_db
+      - PYTHONPATH=/app
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    container_name: ai_platform_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
