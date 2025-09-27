@@ -27,6 +27,11 @@ services:
       - "9200:9200"
       - "9300:9300"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health?wait_for_status=yellow"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -43,8 +48,10 @@ services:
       - DATABASE_URL=postgres://ai_user:K1234567b@db:5432/ai_platform_db
       - PYTHONPATH=/app
     depends_on:
-      - db
-      - elasticsearch
+      db:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     restart: unless-stopped
 
   frontend:

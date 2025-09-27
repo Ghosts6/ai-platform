@@ -42,3 +42,4 @@ ai_agent/Logs/
 
 # Sensitive files
 Doc/
+# ai_agent/data # Uncomment after training

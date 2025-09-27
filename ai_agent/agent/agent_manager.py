@@ -57,7 +57,10 @@ class AgentRouter:
                     best_score = score
                     best_agent_key = key
         
-        agent_class = self.agent_classes.get(best_agent_key) if best_agent_key else self.agent_classes["qa"]
+        if not best_agent_key:
+            best_agent_key = "qa"
+
+        agent_class = self.agent_classes.get(best_agent_key)
         
         agent_params = {"agent_id": best_agent_key, "name": best_agent_key}
         if best_agent_key in ["email", "excel", "teams", "calendar"]:

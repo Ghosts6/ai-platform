@@ -7,6 +7,10 @@ set -e
 echo "Applying database migrations..."
 python manage.py migrate
 
+# Check and seed the knowledge base if it's empty
+echo "Checking knowledge base..."
+python manage.py check_and_seed
+
 # Start server
 echo "Starting server..."
 exec "$@"
