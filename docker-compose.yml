@@ -14,6 +14,20 @@ services:
       - "5433:5432"
     restart: unless-stopped
 
+  elasticsearch:
+    image: elasticsearch:8.11.1
+    container_name: ai_platform_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    restart: unless-stopped
+
   backend:
     build:
       context: .
@@ -30,6 +44,7 @@ services:
       - PYTHONPATH=/app
     depends_on:
       - db
+      - elasticsearch
     restart: unless-stopped
 
   frontend:
@@ -45,4 +60,5 @@ services:
 
 volumes:
   postgres_data:
+  es_data:
 

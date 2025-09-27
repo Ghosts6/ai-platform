@@ -320,3 +320,7 @@ if 'test' in sys.argv[0] or 'pytest' in sys.argv[0]:
     if 'file' in LOGGING['handlers']:
         del LOGGING['handlers']['file']
 
+
+# Elasticsearch Configuration
+ELASTICSEARCH_HOST = os.getenv('ELASTICSEARCH_HOST', 'http://elasticsearch:9200')
+
