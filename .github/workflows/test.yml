@@ -20,7 +20,7 @@ jobs:
         image: elasticsearch:8.11.1
         ports:
           - 9200:9200
-        environment:
+        env:
           discovery.type: single-node
           xpack.security.enabled: "false"
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
