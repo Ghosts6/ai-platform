@@ -664,3 +664,25 @@
 .nav-link-mobile {
     @apply block px-4 py-2 rounded-md text-accent hover:bg-primary hover:text-white transition-all duration-300 ease-in-out;
 }
+
+pre {
+  position: relative;
+}
+
+.copy-button-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: #4a5568;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+pre:hover .copy-button-icon {
+  opacity: 1;
+}
