@@ -3,6 +3,7 @@ from typing import Dict, Any, List, Optional
 import json
 import logging
 from datetime import datetime
+from shared_utils.es_client import es_client
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +111,30 @@ class AgentBase(ABC):
     
     def __repr__(self) -> str:
         return f"<EnhancedAgent(id={self.agent_id}, name='{self.name}', status='{self.status}')>"
+
+    def search_knowledge_base(self, query: str, index_name: str = "knowledge_base") -> List[str]:
+        """
+        Searches the knowledge base for a given query.
+        """
+        if not es_client:
+            logger.error("Elasticsearch client is not available.")
+            return []
+
+        try:
+            response = es_client.search(
+                index=index_name,
+                body={
+                    "query": {
+                        "match": {
+                            "content": query
+                        }
+                    }
+                }
+            )
+            return [hit["_source"]["content"] for hit in response["hits"]["hits"]]
+        except Exception as e:
+            logger.error(f"Error searching knowledge base: {e}", exc_info=True)
+            return []
     
     async def handle_task(self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """A wrapper method to handle a task with logging, status updates, and validation"""

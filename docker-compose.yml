@@ -5,9 +5,9 @@ services:
     image: postgres:13
     container_name: ai_platform_db
     environment:
-      - POSTGRES_DB=ai_platform_db
-      - POSTGRES_USER=ai_user
-      - POSTGRES_PASSWORD=K1234567b
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     ports:
@@ -43,9 +43,9 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DJANGO_SECRET_KEY=dummy-secret-key-for-dev
-      - DJANGO_DEBUG=True
-      - DATABASE_URL=postgres://ai_user:K1234567b@db:5432/ai_platform_db
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_DEBUG=${DJANGO_DEBUG}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - PYTHONPATH=/app
     depends_on:
       db:
