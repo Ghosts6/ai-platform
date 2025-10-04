@@ -1,5 +1,6 @@
 import openai
 import os
+import re
 from .base import AgentBase
 from core_services.models import AgentMemory
 from typing import Dict, Any, List, Optional
@@ -44,7 +45,7 @@ class QAPairAgent(AgentBase):
         # Add QA: 'ask What is AI? Answer: Artificial Intelligence.'
         if prompt_lower.startswith("ask ") and "answer:" in prompt_lower:
             try:
-                q, a = prompt.split("answer:", 1)
+                q, a = re.split("answer:", prompt, 1, re.IGNORECASE)
                 q = q.replace("ask", "", 1).strip()
                 a = a.strip()
                 await self._update_or_create_memory(q, a)
@@ -113,4 +114,4 @@ class QAPairAgent(AgentBase):
                 return {"error": f"Error: unable to get answer from OpenAI. {str(e)}"}
 
     def get_capabilities(self) -> List[str]:
-        return ["ask_question", "add_qa", "update_qa", "delete_qa", "kiarash_bashokian_info"]
+        return ["ask_question", "add_qa", "update_qa", "delete_qa"]
