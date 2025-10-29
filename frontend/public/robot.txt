@@ -1,0 +1,2 @@
+User-agent: *
+Allow: /frontend/public/robots.txt

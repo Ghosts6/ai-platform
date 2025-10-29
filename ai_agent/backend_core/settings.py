@@ -29,13 +29,24 @@ MS_TENANT_ID = os.getenv("MS_TENANT_ID")
 MS_REDIRECT_URI = os.getenv("MS_REDIRECT_URI")
 
 # security settings
-# # **Content Security Policy (CSP)**
-# CSP_DEFAULT_SRC = ["'self'"]  
-# CSP_SCRIPT_SRC = ["'self'"]  
-# CSP_STYLE_SRC = ["'self'", "[https://trusted-cdn.com](https://trusted-cdn.com)"]  
-# CSP_IMG_SRC = ["'self'", "data:"]  
-# CSP_CONNECT_SRC = ["'self'"]  
-# SECURE_REFERRER_POLICY = 'same-origin'
+# **Content Security Policy (CSP)**
+CSP_DEFAULT_SRC = ("'self'", "ai.kiarashbashokian.com")
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_STYLE_SRC = ("'self'",)
+CSP_IMG_SRC = ("'self'", "data:")
+CSP_CONNECT_SRC = ("'self'",)
+
+
+# Production-only security settings
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+
 
 # CROSS config
 CORS_ALLOWED_ORIGINS = [
@@ -91,13 +102,6 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
 EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
 
-# For production, you can use:
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'  # or your SMTP server
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your-email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your-app-password'
 
 DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     "CLASS": "django_rest_passwordreset.tokens.RandomStringTokenGenerator",
@@ -124,6 +128,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "csp.middleware.CSPMiddleware",  # Content Security Policy middleware
 ]
 
 # URL & WSGI
