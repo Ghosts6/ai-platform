@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+
+# Node
+frontend/node_modules
+frontend/build
+frontend/dist
+frontend/npm-debug.log
+
+# Python
+ai_agent/__pycache__
+ai_agent/*/__pycache__
+ai_agent/Logs
+ai_agent/staticfiles
+ai_agent/test_db.sqlite3
+venv
+docker.env
+*.pyc
+*.pyo
+*.pyd

@@ -9,22 +9,14 @@ export default function Footer() {
           <span className="text-primary">&copy; 2025</span>
           <span>AIAgent Platform</span>
         </div>
-        <div className="flex flex-col items-center gap-4 text-base md:flex-row md:gap-8">
-          <div className="flex gap-4">
-            <a href="/" className="hover:text-primary transition font-semibold">Home</a>
-            <a href="/chatbot" className="hover:text-primary transition font-semibold">Chatbot</a>
-            <a href="/readme" className="hover:text-primary transition font-semibold">README</a>
-            <a href="/contact" className="hover:text-primary transition font-semibold">Contact</a>
-          </div>
-          <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4">
-            <a href="mailto:kiarash@kiarashbashokian.com" className="flex items-center gap-1 underline hover:text-primary active:scale-95 transition font-semibold" title="Email us">
-              <FaEnvelope className="text-primary" /> kiarash@kiarashbashokian.com
-            </a>
-            <span className="hidden md:inline text-accent/50">|</span>
-            <a href="https://github.com/Ghosts6/ai-platform" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 underline hover:text-primary active:scale-95 transition font-semibold" title="GitHub Repository">
-              <FaGithub className="text-primary" /> GitHub
-            </a>
-          </div>
+        <div className="flex flex-col items-center gap-2 text-base md:flex-row md:gap-4">
+          <a href="mailto:kiarash@kiarashbashokian.com" className="flex items-center gap-1 underline hover:text-primary active:scale-95 transition font-semibold" title="Email us">
+            <FaEnvelope className="text-primary" /> kiarash@kiarashbashokian.com
+          </a>
+          <span className="hidden md:inline text-accent/50">|</span>
+          <a href="https://github.com/Ghosts6/ai-platform" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 underline hover:text-primary active:scale-95 transition font-semibold" title="GitHub Repository">
+            <FaGithub className="text-primary" /> GitHub
+          </a>
         </div>
       </div>
     </footer>

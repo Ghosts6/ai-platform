@@ -115,7 +115,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",  # for CORS support
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # for static file serving
-    "ai_agent.backend_core.middleware.MaintenanceModeMiddleware",  # maintenance mode
+    "backend_core.middleware.MaintenanceModeMiddleware",  # maintenance mode
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -132,7 +132,6 @@ WSGI_APPLICATION = "backend_core.wsgi.application"
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
-    BASE_DIR / '..' / 'frontend' / 'dist',
     BASE_DIR / 'backend_core' / 'Static',
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -178,7 +177,6 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, '../frontend/dist'),
             os.path.join(BASE_DIR, 'backend_core/Templates'),
         ],
         "APP_DIRS": True,
