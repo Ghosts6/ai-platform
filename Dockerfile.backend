@@ -12,19 +12,20 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the backend application source code
-COPY ai_agent/ .
+# Copy the backend application source code as a subdirectory
+COPY ai_agent /app/ai_agent
 
-# Make the entrypoint script executable
-RUN chmod +x entrypoint.sh
+# Add the parent directory of ai_agent to PYTHONPATH
+ENV PYTHONPATH=/app:$PYTHONPATH
+
+# Make the entrypoint script executable (assuming it's now at /app/ai_agent/entrypoint.sh)
+RUN chmod +x /app/ai_agent/entrypoint.sh
 
 # Expose the port the app runs on
 EXPOSE 8000
 
 # Set the entrypoint script
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/ai_agent/entrypoint.sh"]
 
 # Run the application with Gunicorn
-# We use Gunicorn to run the ASGI application.
-# The number of workers can be adjusted based on the server's resources.
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend_core.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--workers", "4"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "ai_agent.backend_core.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--workers", "4"]

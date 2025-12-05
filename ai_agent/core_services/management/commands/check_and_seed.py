@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core import management
-from shared_utils.es_client import es_client
+from ai_agent.shared_utils.es_client import es_client
 
 class Command(BaseCommand):
     help = 'Checks if the knowledge_base index is empty and seeds it with initial data if necessary.'

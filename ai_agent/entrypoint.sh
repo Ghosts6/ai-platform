@@ -3,6 +3,9 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+# Change to the Django project directory
+cd /app/ai_agent
+
 # Apply database migrations
 echo "Applying database migrations..."
 python manage.py migrate

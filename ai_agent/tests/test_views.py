@@ -4,19 +4,19 @@ from unittest.mock import patch, MagicMock
 from django.test import Client
 from django.apps import apps
 ContactMessage = apps.get_model('core_services', 'ContactMessage')
-from core_services.models import ChatSession, ChatMessage
+from ai_agent.core_services.models import ChatSession, ChatMessage
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
 from asgiref.sync import sync_to_async
 from django.urls import reverse
-from profiles.models import O365Token
+from ai_agent.profiles.models import O365Token
 import datetime
 import asyncio
-from core_services.agents.email import EmailAgent
-from core_services.agents.excel import ExcelAgent
-from core_services.agents.calendar import CalendarAgent
-from core_services.agents.teams import TeamsAgent
+from ai_agent.core_services.agents.email import EmailAgent
+from ai_agent.core_services.agents.excel import ExcelAgent
+from ai_agent.core_services.agents.calendar import CalendarAgent
+from ai_agent.core_services.agents.teams import TeamsAgent
 
 import io
 import os
@@ -111,7 +111,7 @@ def test_respond_to_prompt_authenticated(user):
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
-    with patch('agent.views.router.route') as mock_route:
+    with patch('ai_agent.agent.views.router.route') as mock_route:
         async def async_mock_route(*args, **kwargs):
             return "Test response"
         mock_route.side_effect = async_mock_route
@@ -134,7 +134,7 @@ def test_respond_to_prompt_unauthenticated(user):
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
-    with patch('agent.views.router.route') as mock_route:
+    with patch('ai_agent.agent.views.router.route') as mock_route:
         async def async_mock_route(*args, **kwargs):
             return "EmailAgent: Please authenticate with Microsoft to use email features. You can do so by visiting /ms_auth/login"
         mock_route.side_effect = async_mock_route
@@ -160,7 +160,7 @@ def test_email_agent_authenticated(user):
         token_expiry=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
     )
 
-    with patch('core_services.agents.email.Account') as mock_account:
+    with patch('ai_agent.core_services.agents.email.Account') as mock_account:
         mock_instance = mock_account.return_value
         mock_instance.is_authenticated = True
         
@@ -180,7 +180,7 @@ def test_email_agent_process_authenticated(user):
         token_expiry=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
     )
 
-    with patch('core_services.agents.email.Account') as mock_account:
+    with patch('ai_agent.core_services.agents.email.Account') as mock_account:
         mock_instance = mock_account.return_value
         mock_instance.is_authenticated = True
         mock_mailbox = MagicMock()
@@ -216,7 +216,7 @@ def test_excel_agent_authenticated(user):
         token_expiry=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
     )
 
-    with patch('core_services.agents.excel.Account') as mock_account:
+    with patch('ai_agent.core_services.agents.excel.Account') as mock_account:
         mock_instance = mock_account.return_value
         mock_instance.is_authenticated = True
         
@@ -236,7 +236,7 @@ def test_excel_agent_process_authenticated(user):
         token_expiry=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
     )
 
-    with patch('core_services.agents.excel.Account') as mock_account:
+    with patch('ai_agent.core_services.agents.excel.Account') as mock_account:
         mock_instance = mock_account.return_value
         mock_instance.is_authenticated = True
         mock_storage = MagicMock()
@@ -267,7 +267,7 @@ def test_calendar_agent_authenticated(user):
         token_expiry=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
     )
 
-    with patch('core_services.agents.calendar.Account') as mock_account:
+    with patch('ai_agent.core_services.agents.calendar.Account') as mock_account:
         mock_instance = mock_account.return_value
         mock_instance.is_authenticated = True
         
@@ -287,7 +287,7 @@ def test_calendar_agent_process_authenticated(user):
         token_expiry=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
     )
 
-    with patch('core_services.agents.calendar.Account') as mock_account:
+    with patch('ai_agent.core_services.agents.calendar.Account') as mock_account:
         mock_instance = mock_account.return_value
         mock_instance.is_authenticated = True
         mock_schedule = MagicMock()
@@ -328,7 +328,7 @@ def test_teams_agent_creates_event(monkeypatch):
         is_authenticated = True
         def schedule(self):
             return DummySchedule()
-    monkeypatch.setattr("core_services.agents.teams.Account", lambda *a, **kw: DummyAccount())
+    monkeypatch.setattr("ai_agent.core_services.agents.teams.Account", lambda *a, **kw: DummyAccount())
     agent = TeamsAgent(agent_id="teams", name="teams")
     result = asyncio.run(agent.process({"prompt": "maintenance window on Friday"}))
     assert "Created calendar event" in result['result']
@@ -347,7 +347,7 @@ def test_teams_agent_no_action(monkeypatch):
                             return DummyEvent()
                     return DummyCalendar()
             return DummySchedule()
-    monkeypatch.setattr("core_services.agents.teams.Account", lambda *a, **kw: DummyAccount())
+    monkeypatch.setattr("ai_agent.core_services.agents.teams.Account", lambda *a, **kw: DummyAccount())
     agent = TeamsAgent(agent_id="teams", name="teams")
     result = asyncio.run(agent.process({"prompt": "random unrelated prompt"}))
     assert "No relevant action" in result['result']

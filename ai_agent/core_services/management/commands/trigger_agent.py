@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from agent.agent_manager import AgentRouter
+from ai_agent.agent.agent_manager import AgentRouter
 
 class Command(BaseCommand):
     help = 'Manually trigger an agent task from the CLI.'

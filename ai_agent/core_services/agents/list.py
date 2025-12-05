@@ -3,7 +3,7 @@
 
 import json
 from .base import AgentBase
-from core_services.models import AgentMemory
+from ai_agent.core_services.models import AgentMemory
 
 class ListAgent(AgentBase):
     """

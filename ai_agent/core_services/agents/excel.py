@@ -2,7 +2,7 @@ from .base import AgentBase
 from typing import Dict, Any, List, Optional
 import os
 from O365 import Account
-from profiles.models import O365Token
+from ai_agent.profiles.models import O365Token
 import datetime
 import pandas as pd
 import tempfile

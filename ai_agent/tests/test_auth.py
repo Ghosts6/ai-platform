@@ -9,7 +9,7 @@ from rest_framework.authtoken.models import Token
 import json
 from django.urls import reverse
 from unittest.mock import patch, MagicMock
-from profiles.models import O365Token
+from ai_agent.profiles.models import O365Token
 import asyncio
 from django.core import mail
 from datetime import datetime
@@ -285,7 +285,7 @@ def test_logout(client, user):
 @pytest.mark.django_db
 def test_password_update_security(user):
     """Test that password updates are handled securely"""
-    from profiles.serializers import UserSerializer
+    from ai_agent.profiles.serializers import UserSerializer
     serializer = UserSerializer(user, data={
         'username': 'testuser',
         'email': 'test@example.com',
@@ -371,7 +371,7 @@ def test_microsoft_login_redirects(client, user):
     Test that the microsoft_login view redirects to the Microsoft login page.
     """
     client.force_login(user)
-    with patch('ms_auth.views.Account') as mock_account:
+    with patch('ai_agent.ms_auth.views.Account') as mock_account:
         mock_instance = mock_account.return_value
         mock_instance.get_authorization_url.return_value = ('https://login.microsoftonline.com/test', 'test_state')
         
@@ -390,7 +390,7 @@ def test_microsoft_callback_success(client, user):
     session['ms_auth_state'] = 'test_state'
     session.save()
 
-    with patch('ms_auth.views.Account') as mock_account:
+    with patch('ai_agent.ms_auth.views.Account') as mock_account:
         mock_instance = mock_account.return_value
         mock_instance.authenticate.return_value = True
         mock_instance.connection.get_session.return_value.token = {

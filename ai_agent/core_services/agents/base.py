@@ -3,7 +3,7 @@ from typing import Dict, Any, List, Optional
 import json
 import logging
 from datetime import datetime
-from shared_utils.es_client import es_client
+from ai_agent.shared_utils.es_client import es_client
 
 logger = logging.getLogger(__name__)
 

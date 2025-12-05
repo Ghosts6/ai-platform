@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.conf import settings
 from O365 import Account
-from profiles.models import O365Token
+from ai_agent.profiles.models import O365Token
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 import datetime

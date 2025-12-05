@@ -1,10 +1,10 @@
-from core_services.agents.summarize import SummarizerAgent
-from core_services.agents.qa import QAPairAgent
-from core_services.agents.email import EmailAgent
-from core_services.agents.excel import ExcelAgent
-from core_services.agents.teams import TeamsAgent
-from core_services.agents.calendar import CalendarAgent
-from core_services.models import AgentLog, AgentMemory
+from ai_agent.core_services.agents.summarize import SummarizerAgent
+from ai_agent.core_services.agents.qa import QAPairAgent
+from ai_agent.core_services.agents.email import EmailAgent
+from ai_agent.core_services.agents.excel import ExcelAgent
+from ai_agent.core_services.agents.teams import TeamsAgent
+from ai_agent.core_services.agents.calendar import CalendarAgent
+from ai_agent.core_services.models import AgentLog, AgentMemory
 import openai
 import os
 import asyncio

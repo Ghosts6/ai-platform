@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth.models import User
-from core_services.models import Agent, Task, AgentConfiguration, Workflow, WorkflowStep
-from core_services.serializers import AgentSerializer, TaskSerializer, AgentConfigurationSerializer, WorkflowSerializer, WorkflowStepSerializer
+from ai_agent.core_services.models import Agent, Task, AgentConfiguration, Workflow, WorkflowStep
+from ai_agent.core_services.serializers import AgentSerializer, TaskSerializer, AgentConfigurationSerializer, WorkflowSerializer, WorkflowStepSerializer
 
 @pytest.fixture
 def user(db):

@@ -9,13 +9,13 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/agent/', include('agent.urls')),
-    path('api/profiles/', include('profiles.urls')),
-    path('api/core/', include('core_services.urls')),
-    path('core/', include('core_services.urls')),
-    path('scheduler/', include('scheduler.urls')),
-    path('utils/', include('shared_utils.urls')),
-    path('ms_auth/', include('ms_auth.urls')),
+    path('api/agent/', include('ai_agent.agent.urls')),
+    path('api/profiles/', include('ai_agent.profiles.urls')),
+    path('api/core/', include('ai_agent.core_services.urls')),
+    path('core/', include('ai_agent.core_services.urls')),
+    path('scheduler/', include('ai_agent.scheduler.urls')),
+    path('utils/', include('ai_agent.shared_utils.urls')),
+    path('ms_auth/', include('ai_agent.ms_auth.urls')),
     path('api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('', views.index, name='home_index'),
 

@@ -62,16 +62,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "agent",
-    "core_services",
-    "scheduler",
-    "shared_utils",
-    "profiles",
+    "ai_agent.agent",
+    "ai_agent.core_services",
+    "ai_agent.scheduler",
+    "ai_agent.shared_utils",
+    "ai_agent.profiles",
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
     "django_rest_passwordreset",
-    "ms_auth",
+    "ai_agent.ms_auth",
 ]
 
 REST_FRAMEWORK = {
@@ -117,7 +117,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",  # for CORS support
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # for static file serving
-    "backend_core.middleware.MaintenanceModeMiddleware",  # maintenance mode
+    "ai_agent.backend_core.middleware.MaintenanceModeMiddleware",  # maintenance mode
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",

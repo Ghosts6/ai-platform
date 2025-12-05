@@ -1,5 +1,5 @@
 import pytest
-from core_services.agents.base import AgentBase
+from ai_agent.core_services.agents.base import AgentBase
 from unittest.mock import patch, MagicMock
 import json
 import asyncio
@@ -47,14 +47,14 @@ def test_to_from_json(dummy_agent):
 def test_repr(dummy_agent):
     assert repr(dummy_agent) == "<EnhancedAgent(id=dummy, name='dummy', status='idle')>"
 
-@patch('core_services.agents.base.es_client')
+@patch('ai_agent.core_services.agents.base.es_client')
 def test_search_knowledge_base(mock_es_client, dummy_agent):
     mock_es_client.search.return_value = {"hits": {"hits": [{"_source": {"content": "test"}}]}}
     result = dummy_agent.search_knowledge_base("query")
     assert result == ["test"]
     mock_es_client.search.assert_called_once()
 
-@patch('core_services.agents.base.es_client', None)
+@patch('ai_agent.core_services.agents.base.es_client', None)
 def test_search_knowledge_base_no_es(dummy_agent):
     result = dummy_agent.search_knowledge_base("query")
     assert result == []

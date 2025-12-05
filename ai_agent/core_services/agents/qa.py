@@ -2,7 +2,7 @@ import openai
 import os
 import re
 from .base import AgentBase
-from core_services.models import AgentMemory
+from ai_agent.core_services.models import AgentMemory
 from typing import Dict, Any, List, Optional
 from asgiref.sync import sync_to_async
 

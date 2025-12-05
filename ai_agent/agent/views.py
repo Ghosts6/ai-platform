@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .agent_manager import AgentRouter
-from core_services.models import AgentMemory, ChatSession, ChatMessage
+from ai_agent.core_services.models import AgentMemory, ChatSession, ChatMessage
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import AnonymousUser
 from asgiref.sync import async_to_sync

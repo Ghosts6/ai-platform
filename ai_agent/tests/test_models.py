@@ -1,14 +1,14 @@
 import pytest
-from core_services.models import AgentLog, AgentMemory
+from ai_agent.core_services.models import AgentLog, AgentMemory
 from django.utils import timezone
-from agent.agent_manager import AgentRouter
-from core_services.agents.email import EmailAgent
-from core_services.agents.excel import ExcelAgent
-from core_services.agents.summarize import SummarizerAgent
-from core_services.agents.qa import QAPairAgent
+from ai_agent.agent.agent_manager import AgentRouter
+from ai_agent.core_services.agents.email import EmailAgent
+from ai_agent.core_services.agents.excel import ExcelAgent
+from ai_agent.core_services.agents.summarize import SummarizerAgent
+from ai_agent.core_services.agents.qa import QAPairAgent
 from unittest.mock import patch, MagicMock
 from freezegun import freeze_time
-from profiles.models import O365Token
+from ai_agent.profiles.models import O365Token
 import datetime
 
 @pytest.mark.django_db
@@ -39,7 +39,7 @@ def test_agentmemory_crud():
 import asyncio
 
 @pytest.mark.django_db
-@patch('core_services.agents.summarize.openai.chat.completions.create')
+@patch('ai_agent.core_services.agents.summarize.openai.chat.completions.create')
 def test_summarizer_agent_openai(mock_create):
     mock_response = MagicMock()
     mock_response.choices = [MagicMock(message={'content': 'This is a summary.'})]
@@ -49,7 +49,7 @@ def test_summarizer_agent_openai(mock_create):
     assert "Summary:" in result['result']
 
 @pytest.mark.django_db
-@patch('core_services.agents.qa.openai.chat.completions.create')
+@patch('ai_agent.core_services.agents.qa.openai.chat.completions.create')
 def test_qa_agent_openai(mock_create):
     mock_response = MagicMock()
     mock_response.choices = [MagicMock(message={'content': 'Paris'})]
@@ -78,7 +78,7 @@ def test_agent_router_initialization():
 
 
 @pytest.mark.django_db
-@patch('core_services.agents.excel.ExcelAgent._process_local_file')
+@patch('ai_agent.core_services.agents.excel.ExcelAgent._process_local_file')
 def test_excel_agent_process_local_file_called(mock_process_local_file, user):
     mock_process_local_file.return_value = {"result": "processed"}
     agent = ExcelAgent(agent_id="excel", name="excel", user=user, file_path="dummy.xlsx")
@@ -87,7 +87,7 @@ def test_excel_agent_process_local_file_called(mock_process_local_file, user):
     mock_process_local_file.assert_called_once()
 
 @pytest.mark.django_db
-@patch('core_services.agents.qa.AgentMemory.objects.update_or_create')
+@patch('ai_agent.core_services.models.AgentMemory.objects.update_or_create')
 def test_qa_agent_process_ask_and_answer(mock_update_or_create):
     agent = QAPairAgent(agent_id="qa", name="qa")
     task = {"prompt": "ask What is your name? Answer: My name is Bard."}
@@ -100,7 +100,7 @@ def test_qa_agent_process_ask_and_answer(mock_update_or_create):
     )
 
 @pytest.mark.django_db
-@patch('core_services.agents.qa.AgentMemory.objects.filter')
+@patch('ai_agent.core_services.models.AgentMemory.objects.filter')
 def test_qa_agent_process_delete(mock_filter):
     mock_delete = MagicMock()
     mock_delete.delete.return_value = (1, {})
@@ -112,7 +112,7 @@ def test_qa_agent_process_delete(mock_filter):
     mock_filter.assert_called_once_with(agent_name="qa", key="What is your name?")
 
 @pytest.mark.django_db
-@patch('core_services.agents.qa.AgentMemory.objects.filter')
+@patch('ai_agent.core_services.models.AgentMemory.objects.filter')
 def test_qa_agent_process_get_answer(mock_filter):
     mock_mem = MagicMock()
     mock_mem.value = "My name is Bard."
@@ -124,8 +124,8 @@ def test_qa_agent_process_get_answer(mock_filter):
     mock_filter.assert_called_once_with(agent_name="qa", key="What is your name?")
 
 @pytest.mark.django_db
-@patch('core_services.agents.qa.openai.chat.completions.create')
-@patch('core_services.agents.qa.AgentMemory.objects.filter')
+@patch('ai_agent.core_services.agents.qa.openai.chat.completions.create')
+@patch('ai_agent.core_services.models.AgentMemory.objects.filter')
 def test_qa_agent_process_openai_answer(mock_filter, mock_create):
     mock_filter.return_value.first.return_value = None
     mock_response = MagicMock()
@@ -142,9 +142,9 @@ def test_qa_agent_process_openai_answer(mock_filter, mock_create):
     # A separate integration test would be better.
     
 @pytest.mark.django_db
-@patch('core_services.agents.qa.QAPairAgent.search_knowledge_base')
-@patch('core_services.agents.qa.openai.chat.completions.create')
-@patch('core_services.agents.qa.AgentMemory.objects.filter')
+@patch('ai_agent.core_services.agents.qa.QAPairAgent.search_knowledge_base')
+@patch('ai_agent.core_services.agents.qa.openai.chat.completions.create')
+@patch('ai_agent.core_services.models.AgentMemory.objects.filter')
 def test_qa_agent_rag_workflow(mock_filter, mock_create, mock_search):
     # No answer in memory
     mock_filter.return_value.first.return_value = None
@@ -189,7 +189,7 @@ def test_agent_memory_string_representation():
 
 
 @pytest.mark.django_db
-@patch('agent.agent_manager.QAPairAgent.process')
+@patch('ai_agent.agent.agent_manager.QAPairAgent.process')
 def test_agent_router_route_to_qa(mock_process):
     mock_process.return_value = {"result": "QA agent processed"}
     router = AgentRouter()
@@ -198,7 +198,7 @@ def test_agent_router_route_to_qa(mock_process):
     mock_process.assert_called_once()
 
 @pytest.mark.django_db
-@patch('agent.agent_manager.EmailAgent.process')
+@patch('ai_agent.agent.agent_manager.EmailAgent.process')
 def test_agent_router_route_to_email(mock_process):
     mock_process.return_value = {"result": "Email agent processed"}
     router = AgentRouter()
@@ -207,7 +207,7 @@ def test_agent_router_route_to_email(mock_process):
     mock_process.assert_called_once()
 
 @pytest.mark.django_db
-@patch('agent.agent_manager.QAPairAgent.process')
+@patch('ai_agent.agent.agent_manager.QAPairAgent.process')
 def test_agent_router_route_default_to_qa(mock_process):
     mock_process.return_value = {"result": "QA agent processed"}
     router = AgentRouter()
@@ -216,9 +216,9 @@ def test_agent_router_route_default_to_qa(mock_process):
     mock_process.assert_called_once()
 
 @pytest.mark.django_db
-@patch('core_services.agents.base.es_client')
-@patch('core_services.agents.qa.openai.chat.completions.create')
-@patch('core_services.agents.qa.AgentMemory.objects.filter')
+@patch('ai_agent.core_services.agents.base.es_client')
+@patch('ai_agent.core_services.agents.qa.openai.chat.completions.create')
+@patch('ai_agent.core_services.models.AgentMemory.objects.filter')
 def test_qa_agent_rag_integration(mock_filter, mock_create, mock_es_client):
     # No answer in memory
     mock_filter.return_value.first.return_value = None
