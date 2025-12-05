@@ -1,33 +1,54 @@
-asgiref==3.9.1
-beautifulsoup4==4.13.4
-celery==5.5.3
-certifi==2025.7.14
-charset-normalizer==3.4.2
+# Core Framework
 Django==4.2.23
-django-cors-headers==4.7.0
+
+# API & Serialization
 django-rest-passwordreset==1.5.0
 djangorestframework==3.16.0
 djangorestframework-simplejwt==5.3.1
+
+# Database
 dj-database-url==3.0.1
+psycopg2-binary==2.9.10
+sqlparse==0.5.3
+
+# Web & Networking
+asgiref==3.9.1
+beautifulsoup4==4.13.4
+charset-normalizer==3.4.2
+django-cors-headers==4.7.0
+httpx==0.28.1
 idna==3.10
+requests==2.32.4
+requests-oauthlib==2.0.0
+soupsieve==2.7
+urllib3==2.5.0
+whitenoise==6.9.0
+
+# AI, Data & Document Processing
+elasticsearch~=8.11
 O365==2.1.4
 openai==1.97.1
-pandas==2.2.2
 openpyxl==3.1.5
-psycopg2-binary==2.9.10
+pandas==2.2.2
+pypdf
+python-docx
+
+# Asynchronous & Background Tasks
+anyio==4.9.0
+celery==5.5.3
+
+# Utilities
+certifi==2025.7.14
 PyJWT==2.10.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
-requests==2.32.4
-requests-oauthlib==2.0.0
 six==1.17.0
-soupsieve==2.7
-sqlparse==0.5.3
-urllib3==2.5.0
-whitenoise==6.9.0
-pytest-django==4.11.1
+
+# Testing
+freezegun==1.5.1
+pytest-asyncio==0.23.6
 pytest-cov==6.2.1
-pytest-asyncio==1.1.0
+pytest-django==4.11.1
 pytest-xdist==3.8.0
 anyio==4.9.0
 httpx==0.28.1

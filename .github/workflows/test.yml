@@ -18,7 +18,7 @@ jobs:
 
       - name: 📄 Create .env file for testing
         run: |
-          cat <<EOF > docker.env
+          cat <<EOF > .env
           DJANGO_SECRET_KEY=test-secret
           DJANGO_DEBUG=True
           DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend
@@ -37,4 +37,5 @@ jobs:
 
       - name: 🧪 Run Pytest
         run: docker-compose exec -T backend pytest -v tests/
+
 

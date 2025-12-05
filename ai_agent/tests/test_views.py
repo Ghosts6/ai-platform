@@ -410,7 +410,9 @@ def test_excel_agent_summarize_fallback_without_openai_key(user):
         result = asyncio.run(agent.process(task={'prompt': 'summarize this file'}))
         assert 'Columns' in result['result'] and 'Rows' in result['result']
     finally:
+        from django.db import connection
         try:
             os.remove(tmp_path)
         except Exception:
             pass
+        connection.close()

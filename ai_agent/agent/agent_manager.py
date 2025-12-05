@@ -59,7 +59,7 @@ class AgentRouter:
         
         if not best_agent_key:
             best_agent_key = "qa"
-        
+
         agent_class = self.agent_classes.get(best_agent_key)
         
         agent_params = {"agent_id": best_agent_key, "name": best_agent_key}

@@ -39,3 +39,7 @@ docker-compose.override.yml
 # Others
 *.DS_Store
 ai_agent/Logs/
+
+# Sensitive files
+Doc/
+# ai_agent/data # Uncomment after training

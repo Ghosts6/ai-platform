@@ -39,6 +39,8 @@ MS_REDIRECT_URI = os.getenv("MS_REDIRECT_URI")
 
 # CROSS config
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:8000",
@@ -315,4 +317,8 @@ if 'test' in sys.argv[0] or 'pytest' in sys.argv[0]:
     # Disable file logging during tests by removing the file handler
     if 'file' in LOGGING['handlers']:
         del LOGGING['handlers']['file']
+
+
+# Elasticsearch Configuration
+ELASTICSEARCH_HOST = os.getenv('ELASTICSEARCH_HOST', 'http://elasticsearch:9200')
 

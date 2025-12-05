@@ -41,7 +41,7 @@ class ExcelAgent(AgentBase):
                     'refresh_token': token_data.refresh_token,
                     'expires_at': token_data.token_expiry.timestamp()
                 }
-                self.account = Account(credentials, auth_flow_type='web', token=token)
+                self.account = Account(credentials, auth_flow_type='authorization', token=token)
         except O365Token.DoesNotExist:
             pass
 

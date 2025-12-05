@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import ScrollToTopButton from '../components/ScrollToTopButton';
 import { FiZap, FiMessageCircle, FiPlay, FiInfo, FiMail, FiFileText, FiHelpCircle, FiBarChart, FiUsers, FiCalendar, FiList } from 'react-icons/fi';
 
 export default function Agents() {
@@ -12,6 +13,7 @@ export default function Agents() {
   const [error, setError] = useState(null);
   const [userQuery, setUserQuery] = useState('');
   const [isQueryLoading, setIsQueryLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
   const interactionRef = useRef(null);
 
@@ -85,6 +87,22 @@ export default function Agents() {
     setAgents(agentsList);
     setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+    window.addEventListener('scroll', toggleVisibility);
+    return () => window.removeEventListener('scroll', toggleVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleAgentSelect = (agent) => {
     navigate('/agent', { state: { agentId: agent.id, agentName: agent.name } });
@@ -367,6 +385,7 @@ export default function Agents() {
         </div>
       </main>
       <Footer />
+      <ScrollToTopButton visible={isVisible} onClick={scrollToTop} />
     </div>
   );
 }

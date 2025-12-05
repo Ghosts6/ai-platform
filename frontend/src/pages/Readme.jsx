@@ -9,18 +9,25 @@ import { marked } from 'marked';
 
 export default function ReadmePage() {
   const [readme, setReadme] = useState('');
+  const [banner, setBanner] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   useCodeHighlight();
 
   useEffect(() => {
-    fetch('/README.md')
+    fetch(`/README.md?v=${new Date().getTime()}`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch README.md');
         return res.text();
       })
       .then((text) => {
+        const bannerRegex = /!\[AIAgent\]\((.*?)\)/;
+        const match = text.match(bannerRegex);
+        if (match) {
+          setBanner(match[1].replace('/frontend/public', '').replace('?raw=true', ''));
+          text = text.replace(bannerRegex, '');
+        }
         setReadme(text);
         setLoading(false);
       })
@@ -50,17 +57,15 @@ export default function ReadmePage() {
     <div className="flex flex-col min-h-screen bg-background text-accent font-body">
       <Header />
       <main className="flex-1 flex flex-col items-center px-4 py-12 md:py-20 w-full">
-        <div className="flex flex-col items-center gap-4 w-full bg-surface rounded-xl shadow-xl p-8 relative overflow-hidden">
-          <div className="overflow-hidden">
-            <h1 className="text-4xl md:text-5xl font-display font-extrabold text-primary mb-4 tracking-tight text-center flex items-center gap-2 animate-typing overflow-hidden whitespace-nowrap">
-              <FaCrown className="text-primary drop-shadow" /> README
-            </h1>
+        <div className="w-full max-w-4xl mx-auto">
+          {banner && <img src={banner} alt="AIAgent Banner" className="w-full rounded-t-xl shadow-lg" />}
+          <div className="bg-surface rounded-b-xl shadow-xl p-8">
+            <article className="prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none w-full prose-invert prose-headings:text-primary prose-a:text-primary prose-strong:text-primary prose-blockquote:border-primary prose-code:text-cyan-400 prose-pre:bg-gray-800">
+              {loading && <div className="text-center text-accent/60">Loading README...</div>}
+              {error && <div className="text-center text-red-600">{error}</div>}
+              {!loading && !error && <MarkdownRenderer>{readme}</MarkdownRenderer>}
+            </article>
           </div>
-          <article className="prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none w-full bg-[#23272f] text-[#f3f6fa] rounded-lg p-4 sm:p-6 md:p-8 shadow-inner backdrop-blur-md code-enhanced prose-headings:text-primary prose-a:text-primary prose-pre:bg-[#181b20] prose-code:text-[#00adb5]">
-            {loading && <div className="text-center text-accent/60">Loading README...</div>}
-            {error && <div className="text-center text-red-600">{error}</div>}
-            {!loading && !error && <MarkdownRenderer>{readme}</MarkdownRenderer>}
-          </article>
         </div>
       </main>
       <Footer />
@@ -79,5 +84,5 @@ function MarkdownRenderer({ children }) {
 }
 
 function rewriteImagePaths(markdown) {
-  return markdown.replace(/\]\(\/img\//g, '](/static/img/');
+  return markdown.replace(/\]\(\/img\//g, '](/img/');
 }
