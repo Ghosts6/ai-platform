@@ -93,13 +93,17 @@ export default function Contact() {
           </div>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-4">
-              <div className="relative">
-                <FaUser className="absolute top-1/2 -translate-y-1/2 left-4 text-primary" />
-                <input type="text" placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-background border-2 border-secondary rounded-lg p-3 pl-12 focus:outline-none focus:ring-2 focus:ring-primary transition-all" />
+              <div className="input-icon-group">
+                <span className="icon-element">
+                  <FaUser className="text-primary w-5 h-5" />
+                </span>
+                <input type="text" placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-background border-2 border-secondary rounded-lg pl-10 pr-3 py-3 focus:outline-none focus:ring-2 focus:ring-primary transition-all" />
               </div>
-              <div className="relative">
-                <FaEnvelope className="absolute top-1/2 -translate-y-1/2 left-4 text-primary" />
-                <input type="email" placeholder="Your Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-background border-2 border-secondary rounded-lg p-3 pl-12 focus:outline-none focus:ring-2 focus:ring-primary transition-all" />
+              <div className="input-icon-group">
+                <span className="icon-element">
+                  <FaEnvelope className="text-primary w-5 h-5" />
+                </span>
+                <input type="email" placeholder="Your Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-background border-2 border-secondary rounded-lg pl-10 pr-3 py-3 focus:outline-none focus:ring-2 focus:ring-primary transition-all" />
               </div>
               <input type="text" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} className="hidden" />
             </div>

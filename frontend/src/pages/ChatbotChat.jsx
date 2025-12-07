@@ -121,8 +121,8 @@ const Chat = () => {
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-surface text-accent font-body">
             <Header />
-            <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 w-full">
-                <div className="w-full max-w-5xl h-[85vh] sm:h-[75vh] flex flex-col bg-surface/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-primary/20 overflow-hidden">
+            <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 w-full py-8">
+                <div className="w-full max-w-5xl h-[75vh] sm:h-[70vh] flex flex-col bg-surface/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-primary/20 overflow-hidden">
                     {/* Chat Header */}
                     <div className="bg-gradient-to-r from-primary/20 to-secondary/20 p-4 border-b border-primary/20">
                         <div className="flex items-center justify-between">

@@ -56,8 +56,8 @@ const ChatSession = () => {
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-surface text-accent font-body">
             <Header />
-            <main className="flex-1 flex items-center justify-center p-2 sm:p-4 w-full">
-                <div className="w-full max-w-4xl h-[85vh] md:h-[75vh] flex flex-col bg-surface/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-primary/20 overflow-hidden">
+            <main className="flex-1 flex items-center justify-center p-2 sm:p-4 w-full py-8">
+                <div className="w-full max-w-4xl h-[75vh] md:h-[70vh] flex flex-col bg-surface/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-primary/20 overflow-hidden">
                     <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4">
                         {messages.map((msg, index) => (
                             <div key={index} className={`flex items-end gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>

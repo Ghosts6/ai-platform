@@ -6,7 +6,7 @@ export default function NotFound() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-accent font-body">
       <Header />
-      <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 w-full">
+      <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 w-full min-h-[60vh]">
         <FaCrown className="text-red-500 text-5xl mb-4 drop-shadow-lg" />
         <h1 className="text-6xl font-extrabold text-red-500 mb-2">404</h1>
         <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>

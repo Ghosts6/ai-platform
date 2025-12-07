@@ -175,7 +175,7 @@ const Login = () => {
     return (
         <div className="login-container">
             <Header />
-            <div className="login-box">
+            <div className="login-box min-h-[60vh] flex items-center justify-center">
                 <div className="login-toggle">
                     <button onClick={() => setIsLogin(true)} className={isLogin ? 'active' : ''}>Login</button>
                     <button onClick={() => setIsLogin(false)} className={!isLogin ? 'active' : ''}>Sign Up</button>

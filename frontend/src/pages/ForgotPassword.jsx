@@ -43,7 +43,7 @@ const ForgotPassword = () => {
     return (
         <div className="login-container">
             <Header />
-            <div className="login-box">
+            <div className="login-box min-h-[60vh] flex items-center justify-center">
                 <form className="login-form" onSubmit={handleSubmit}>
                     <h2 className="text-2xl font-bold mb-4 text-primary">Forgot Password</h2>
                     <p className="mb-4 text-[#111111]">Enter your email address and we will send you a link to reset your password.</p>

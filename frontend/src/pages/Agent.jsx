@@ -123,7 +123,7 @@ const Agent = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background text-accent font-body">
       <Header />
-      <main className="flex-1 flex flex-col md:flex-row w-full">
+      <main className="flex-1 flex flex-col md:flex-row w-full py-8 min-h-screen">
         <aside className="w-full md:w-1/4 md:max-w-xs bg-surface/30 p-4 md:border-r border-primary/20">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-accent/70">Agents</span>
@@ -134,14 +134,16 @@ const Agent = () => {
               History
             </button>
           </div>
-          <div className="relative mb-4">
-            <FiSearch className="absolute top-3 left-3 text-accent/50" />
+          <div className="input-icon-group mb-4">
+            <span className="icon-element">
+              <FiSearch className="text-accent/50 w-5 h-5" />
+            </span>
             <input 
               type="text"
               placeholder="Search agents..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-background/50 text-accent border-2 border-primary/30 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-300"
+              className="w-full bg-background/50 text-accent border-2 border-primary/30 rounded-lg pl-10 pr-3 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-300"
             />
           </div>
           <ul className="space-y-2">
@@ -163,7 +165,7 @@ const Agent = () => {
         </aside>
         <section className="w-full md:w-3/4 p-8 overflow-y-auto">
           {selectedAgent ? (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in h-full">
               <h1 className="text-4xl font-display font-extrabold text-primary mb-2">{selectedAgent.name}</h1>
               <p className="text-lg text-accent/80 mb-8">{selectedAgent.description}</p>
 

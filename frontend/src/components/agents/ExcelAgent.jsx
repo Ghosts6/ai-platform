@@ -12,7 +12,7 @@ const ExcelAgent = ({ selectedAgent, prompt, setPrompt, response, setResponse, i
   const chatEndRef = useRef(null);
 
   useEffect(() => {
-    if (chatEndRef.current) {
+    if (chatEndRef.current && excelMessages.length > 0) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [excelMessages, excelTyping]);

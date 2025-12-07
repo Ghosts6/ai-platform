@@ -3,8 +3,21 @@
 @tailwind utilities;
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
   body {
     @apply bg-background text-accent font-body;
+  }
+  
+  * {
+    @apply scroll-smooth;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
   }
 }
 
@@ -19,6 +32,18 @@
 
 /* Component Styles */
 @layer components {
+  /* New, robust component for inputs with icons */
+  .input-icon-group {
+    @apply relative;
+  }
+  .input-icon-group .icon-element {
+    @apply absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none;
+  }
+
+  div.input-icon-group > input.w-full {
+    padding-left: 2.75rem;
+  }
+
   .header-career {
     --border-color: linear-gradient(-45deg, #3F72AF, #112D4E, #DBE2EF);
     --border-width: 2px;
@@ -106,22 +131,11 @@
   }
 
   .nav-link {
-    @apply relative text-accent text-lg font-semibold transition-all duration-300 hover:text-primary hover:scale-105;
+    @apply relative text-accent text-base md:text-lg font-semibold transition-all duration-300 hover:text-primary px-4 py-2 rounded-md;
   }
 
-  .nav-link::before,
-  .nav-link::after {
-    content: '';
-    @apply absolute bottom-[-4px] left-0 w-0 h-[2px] bg-primary transition-all duration-500;
-  }
-
-  .nav-link::before {
-    @apply left-auto right-0;
-  }
-
-  .nav-link:hover::after,
-  .nav-link:hover::before {
-    @apply w-full;
+  .nav-link-active {
+    @apply text-primary border-b-2 border-primary;
   }
 
   .login-box {
@@ -425,6 +439,7 @@
     justify-content: center;
     align-items: center;
     padding: 20px;
+    margin-bottom: 4rem;
 }
 
 .login-toggle {
@@ -658,11 +673,15 @@
 }
 
 .btn-primary {
-    @apply px-4 py-2 rounded-md font-semibold text-white bg-primary hover:bg-primary-hover transition-all duration-300 ease-in-out shadow-md;
+    @apply px-5 py-2.5 rounded-lg font-semibold text-white bg-primary hover:bg-primary-hover transition-all duration-300 ease-in-out shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95;
 }
 
 .nav-link-mobile {
-    @apply block px-4 py-2 rounded-md text-accent hover:bg-primary hover:text-white transition-all duration-300 ease-in-out;
+    @apply block px-4 py-3 rounded-lg text-accent hover:bg-primary hover:text-white transition-all duration-300 ease-in-out font-medium;
+}
+
+.nav-link-mobile.bg-primary {
+    @apply font-bold shadow-md transform scale-105;
 }
 
 pre {
@@ -685,4 +704,155 @@ pre {
 
 pre:hover .copy-button-icon {
   opacity: 1;
+}
+
+.card {
+  @apply bg-surface/80 backdrop-blur-sm rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-xl border border-primary/10;
+}
+
+.card-hover {
+  @apply card hover:border-primary/30 hover:scale-[1.02] hover:bg-surface/90;
+}
+
+.card-feature {
+  @apply bg-gradient-to-br from-secondary/60 to-secondary/40 backdrop-blur-sm rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] border border-primary/20 hover:border-primary/40;
+}
+
+
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  @apply transition-all duration-300 bg-background/50 border-2 border-secondary/50 rounded-lg px-4 py-3 text-accent placeholder-accent/50;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  @apply ring-2 ring-primary/50 border-primary bg-background shadow-lg shadow-primary/10;
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+textarea:hover {
+  @apply border-primary/50;
+}
+
+a, button {
+  @apply transition-all duration-200;
+}
+
+*:focus-visible {
+  @apply outline-2 outline-primary outline-offset-2;
+}
+
+/* Skeleton Loader */
+.skeleton {
+  @apply animate-pulse bg-secondary/50 rounded;
+}
+
+.skeleton-text {
+  @apply skeleton h-4 mb-2;
+}
+
+.skeleton-title {
+  @apply skeleton h-6 mb-4 w-3/4;
+}
+
+.skeleton-card {
+  @apply skeleton rounded-xl p-6;
+}
+
+/* Modern Button Variants */
+.btn-secondary {
+  @apply px-5 py-2.5 rounded-lg font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/30 transition-all duration-300 ease-in-out shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95;
+}
+
+.btn-ghost {
+  @apply px-5 py-2.5 rounded-lg font-semibold text-accent hover:text-primary hover:bg-secondary/50 transition-all duration-300 ease-in-out;
+}
+
+/* Gradient Text */
+.gradient-text {
+  @apply bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent;
+}
+
+/* Glassmorphism Effect */
+.glass {
+  @apply bg-surface/60 backdrop-blur-md border border-primary/20 shadow-xl;
+}
+
+/* Smooth Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-secondary/30;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/50 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary;
+}
+
+/* Loading Spinner */
+.spinner {
+  @apply inline-block w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin;
+}
+
+/* Pulse Animation for Status Indicators */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(0, 173, 181, 0.7);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 10px rgba(0, 173, 181, 0);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Fade In Up Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Stagger Animation Delay */
+.animate-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animate-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animate-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animate-delay-400 {
+  animation-delay: 400ms;
 }

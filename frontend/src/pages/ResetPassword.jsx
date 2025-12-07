@@ -81,7 +81,7 @@ const ResetPassword = () => {
     return (
         <div className="login-container">
             <Header />
-            <div className="login-box">
+            <div className="login-box min-h-[60vh] flex items-center justify-center">
                 <form className="login-form" onSubmit={handleSubmit}>
                     <h2 className="text-2xl font-bold mb-4">Reset Password</h2>
                     <input name="password" type="password" placeholder="New Password" className="login-input" />

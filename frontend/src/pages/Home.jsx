@@ -64,24 +64,24 @@ const UseCasesSection = () => {
   return (
     <section className="w-full max-w-5xl mb-20">
       <h2 className="text-4xl font-bold text-primary mb-12 text-center">Use Cases</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-        <div className="bg-gray-800/50 p-6 rounded-lg">
-          <FaEnvelope className="text-primary text-5xl mb-4 mx-auto" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+        <div className="card-feature animate-fade-in-up">
+          <FaEnvelope className="text-primary text-5xl mb-4 mx-auto transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">Email Automation</h3>
           <p className="text-lg text-accent/80">Summarize, draft, and send emails automatically.</p>
         </div>
-        <div className="bg-gray-800/50 p-6 rounded-lg">
-          <FaFileExcel className="text-primary text-5xl mb-4 mx-auto" />
+        <div className="card-feature animate-fade-in-up animate-delay-100">
+          <FaFileExcel className="text-primary text-5xl mb-4 mx-auto transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">Data Analysis</h3>
           <p className="text-lg text-accent/80">Analyze data from Excel files and generate insights.</p>
         </div>
-        <div className="bg-gray-800/50 p-6 rounded-lg">
-          <FaCalendarAlt className="text-primary text-5xl mb-4 mx-auto" />
+        <div className="card-feature animate-fade-in-up animate-delay-200">
+          <FaCalendarAlt className="text-primary text-5xl mb-4 mx-auto transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">Calendar Management</h3>
           <p className="text-lg text-accent/80">Create and manage calendar events and meetings.</p>
         </div>
-        <div className="bg-gray-800/50 p-6 rounded-lg">
-          <FaTasks className="text-primary text-5xl mb-4 mx-auto" />
+        <div className="card-feature animate-fade-in-up animate-delay-300">
+          <FaTasks className="text-primary text-5xl mb-4 mx-auto transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">Task Automation</h3>
           <p className="text-lg text-accent/80">Automate repetitive tasks and workflows.</p>
         </div>
@@ -104,34 +104,34 @@ const FeaturesSection = () => {
         <FaCrown className="text-primary text-4xl mr-4" />
         <h2 className="text-4xl font-bold text-primary">Features</h2>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-center">
-        <div className="bg-gray-800/50 p-6 rounded-lg">
-          <FaServer className="text-primary text-5xl mb-4 mx-auto" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
+        <div className="card-feature animate-fade-in-up">
+          <FaServer className="text-primary text-5xl mb-4 mx-auto transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">Modular Backend</h3>
           <p className="text-lg text-accent/80">Reusable Django apps for core services, agents, and scheduling.</p>
         </div>
-        <div className="bg-gray-800/50 p-6 rounded-lg">
-          <FaReact className="text-primary text-5xl mb-4 mx-auto" />
+        <div className="card-feature animate-fade-in-up animate-delay-100">
+          <FaReact className="text-primary text-5xl mb-4 mx-auto transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">React Frontend</h3>
           <p className="text-lg text-accent/80">A dynamic and responsive user interface for interacting with the AI agents.</p>
         </div>
-        <div className="bg-gray-800/50 p-6 rounded-lg">
-          <FaBrain className="text-primary text-5xl mb-4 mx-auto" />
+        <div className="card-feature animate-fade-in-up animate-delay-200">
+          <FaBrain className="text-primary text-5xl mb-4 mx-auto transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">LLM Integration</h3>
           <p className="text-lg text-accent/80">Seamlessly connect with OpenAI for dynamic prompt handling.</p>
         </div>
-        <div className="bg-gray-800/50 p-6 rounded-lg">
-          <FaCode className="text-primary text-5xl mb-4 mx-auto" />
+        <div className="card-feature animate-fade-in-up animate-delay-300">
+          <FaCode className="text-primary text-5xl mb-4 mx-auto transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">REST APIs</h3>
           <p className="text-lg text-accent/80">Communicate between the frontend and backend using Django REST Framework.</p>
         </div>
-        <div className="bg-gray-800/50 p-6 rounded-lg">
-          <FaRobot className="text-primary text-5xl mb-4 mx-auto" />
+        <div className="card-feature animate-fade-in-up animate-delay-400">
+          <FaRobot className="text-primary text-5xl mb-4 mx-auto transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">Pre-built Agents</h3>
           <p className="text-lg text-accent/80">Includes agents for summarization, Q&A, email, Excel, and Teams calendar integration.</p>
         </div>
-        <div className="bg-gray-800/50 p-6 rounded-lg">
-          <FaRocket className="text-primary text-5xl mb-4 mx-auto" />
+        <div className="card-feature animate-fade-in-up animate-delay-400">
+          <FaRocket className="text-primary text-5xl mb-4 mx-auto transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">CI/CD Pipeline</h3>
           <p className="text-lg text-accent/80">Automated testing and deployment with GitHub Actions.</p>
         </div>
@@ -150,19 +150,19 @@ const TechStackSection = () => {
       <p className="text-xl text-accent/80 mb-8 text-center">
         This platform is built on a modern, robust technology stack to ensure scalability, reliability, and a seamless user experience.
       </p>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-        <div className="bg-gray-800/50 p-6 rounded-lg flex flex-col items-center">
-          <FaReact className="text-primary text-5xl mb-4" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+        <div className="card-feature flex flex-col items-center animate-fade-in-up">
+          <FaReact className="text-primary text-5xl mb-4 transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">Frontend</h3>
           <p className="text-lg text-accent/80">React, Tailwind CSS</p>
         </div>
-        <div className="bg-gray-800/50 p-6 rounded-lg flex flex-col items-center">
-          <FaServer className="text-primary text-5xl mb-4" />
+        <div className="card-feature flex flex-col items-center animate-fade-in-up animate-delay-100">
+          <FaServer className="text-primary text-5xl mb-4 transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">Backend</h3>
           <p className="text-lg text-accent/80">Django, Django REST Framework</p>
         </div>
-        <div className="bg-gray-800/50 p-6 rounded-lg flex flex-col items-center">
-          <FaDatabase className="text-primary text-5xl mb-4" />
+        <div className="card-feature flex flex-col items-center animate-fade-in-up animate-delay-200">
+          <FaDatabase className="text-primary text-5xl mb-4 transition-transform duration-300 hover:scale-110" />
           <h3 className="text-2xl font-bold text-primary mb-2">AI Integration</h3>
           <p className="text-lg text-accent/80">OpenAI API</p>
         </div>
