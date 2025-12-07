@@ -1,16 +1,18 @@
-import os
 import pytest
 from django.contrib.auth.models import User
+from django.test import override_settings
 
-@pytest.fixture(autouse=True, scope="session")
-def set_test_mode_env():
-    original = os.environ.get("TEST_MODE")
-    os.environ["TEST_MODE"] = "True"
-    yield
-    if original is not None:
-        os.environ["TEST_MODE"] = original
-    else:
-        del os.environ["TEST_MODE"]
+@pytest.fixture(autouse=True)
+def setup_celery_eager_and_email_backend():
+    """
+    Ensure Celery tasks run eagerly and emails are captured in tests.
+    """
+    with override_settings(
+        CELERY_TASK_ALWAYS_EAGER=True,
+        CELERY_TASK_EAGER_PROPAGATES_EXCEPTIONS=True,
+        EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend'
+    ):
+        yield
 
 @pytest.fixture
 def user(db):

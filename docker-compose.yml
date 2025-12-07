@@ -17,6 +17,17 @@ services:
       timeout: 5s
       retries: 5
 
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: python manage.py migrate --noinput
+    env_file:
+      - ./.env
+    depends_on:
+      db:
+        condition: service_healthy
+
   redis:
     image: redis:6.2-alpine
     ports:
@@ -52,32 +63,25 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    ports:
-      - "8000:8000"
+    command: gunicorn --bind 0.0.0.0:8000 ai_agent.backend_core.asgi:application -k uvicorn.workers.UvicornWorker --workers 4
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     env_file:
       - ./.env
-    environment:
-      - DJANGO_SETTINGS_MODULE=ai_agent.backend_core.settings
-    volumes:
-      - ./ai_agent/Logs:/app/Logs
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+    ports:
+      - "8000:8000"
 
   celery:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    command: celery -A backend_core worker -l info
+    command: celery -A ai_agent.backend_core worker -l info
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     env_file:
       - ./.env
-    depends_on:
-      redis:
-        condition: service_healthy
-      backend:
-        condition: service_started
 
   frontend:
     build:

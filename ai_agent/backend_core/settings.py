@@ -16,10 +16,28 @@ DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
 IS_TESTING = os.getenv("TEST_MODE", "False") == "True"
 MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "False").lower() == "true"
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+# Celery Eager Execution for Tests
+if IS_TESTING:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES_EXCEPTIONS = True
+
 
 # External Services
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", "False").lower() == "true"
+CELERY_TASK_EAGER_PROPAGATES_EXCEPTIONS = True
+
+# Celery Result Backend (for django-celery-results)
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
 TEST_MODE = os.getenv("TEST_MODE", "False").lower() == "true"
 
 # Microsoft Graph API credentials
@@ -62,6 +80,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_celery_results",
+    "django_celery_beat",
     "ai_agent.agent",
     "ai_agent.core_services",
     "ai_agent.scheduler",
@@ -117,7 +137,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",  # for CORS support
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # for static file serving
-    "ai_agent.backend_core.middleware.MaintenanceModeMiddleware",  # maintenance mode
+    "ai_agent.backend_core.middleware.RedirectAndMaintenanceMiddleware",  # maintenance and redirection
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",

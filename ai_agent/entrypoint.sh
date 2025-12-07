@@ -1,19 +1,8 @@
 #!/bin/sh
-
-# Exit immediately if a command exits with a non-zero status.
 set -e
 
-# Change to the Django project directory
 cd /app/ai_agent
 
-# Apply database migrations
-echo "Applying database migrations..."
-python manage.py migrate
+python manage.py collectstatic --noinput
 
-# Check and seed the knowledge base if it's empty
-echo "Checking knowledge base..."
-python manage.py check_and_seed
-
-# Start server
-echo "Starting server..."
 exec "$@"
