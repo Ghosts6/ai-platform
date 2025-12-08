@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaBars, FaTimes } from 'react-icons/fa';
+import { FaBars, FaTimes, FaHome, FaComments, FaUsers, FaBook, FaEnvelope, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
 
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
@@ -36,105 +36,184 @@ export default function Header() {
 
   const isActive = (path) => location.pathname === path;
 
+  const handleNavClick = (e, path) => {
+    e.preventDefault();
+    setIsMenuOpen(false);
+    navigate(path);
+  };
+
+  const navItems = [
+    { path: '/', label: 'Home', icon: FaHome },
+    { path: '/chatbot', label: 'Chatbot', icon: FaComments },
+    { path: '/agents', label: 'Agents', icon: FaUsers },
+    { path: '/readme', label: 'README', icon: FaBook },
+    { path: '/contact', label: 'Contact', icon: FaEnvelope },
+  ];
+
   return (
-    <header className={`w-full bg-secondary text-accent py-4 shadow-lg relative z-50 transition-all duration-300 ${
-      isScrolled ? 'shadow-2xl bg-secondary/95 backdrop-blur-sm' : ''
-    } sticky top-0`}>
-      <div className="container mx-auto flex justify-between items-center px-4 md:px-6 lg:px-8">
-        <a href="/" className="flex items-center group transition-transform duration-300 hover:scale-105">
-          <span className="logo-icon-wrapper mr-2">
-            <img src="/img/logo.png" alt="AIAgent Logo" className="h-10 w-10 md:h-12 md:w-12 transition-transform duration-300 ease-in-out logo-hover" />
-          </span>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-primary logo-text-animate">AIAgent</h1>
-        </a>
-        <nav className="hidden md:flex space-x-6 lg:space-x-8 items-center">
-          <a href="/" className={`nav-link ${isActive('/') ? 'nav-link-active' : ''}`}>Home</a>
-          <a href="/chatbot" className={`nav-link ${isActive('/chatbot') ? 'nav-link-active' : ''}`}>Chatbot</a>
-          <a href="/agents" className={`nav-link ${isActive('/agents') ? 'nav-link-active' : ''}`}>Agents</a>
-          <a href="/readme" className={`nav-link ${isActive('/readme') ? 'nav-link-active' : ''}`}>README</a>
-          <a href="/contact" className={`nav-link ${isActive('/contact') ? 'nav-link-active' : ''}`}>Contact</a>
-          {isLoggedIn ? (
-            <button onClick={handleLogout} className="btn-primary ml-2">Logout</button>
-          ) : (
-            <a href="/login" className="btn-primary ml-2">Login</a>
-          )}
-        </nav>
-        <div className="md:hidden">
+    <>
+      <header className={`w-full bg-secondary/95 backdrop-blur-md text-accent py-3 md:py-4 shadow-lg fixed top-0 z-50 transition-all duration-300 border-b border-primary/10 ${
+        isScrolled ? 'shadow-2xl bg-secondary/98' : ''
+      }`}>
+        <div className="container mx-auto flex justify-between items-center px-4 md:px-6 lg:px-8">
+          {/* Logo */}
+          <a 
+            href="/" 
+            onClick={(e) => handleNavClick(e, '/')}
+            className="flex items-center gap-3 group relative"
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 rounded-full blur-md group-hover:blur-lg transition-all duration-300"></div>
+              <img 
+                src="/img/logo.png" 
+                alt="AIAgent Logo" 
+                className="h-10 w-10 md:h-12 md:w-12 relative z-10 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" 
+              />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-primary transition-all duration-300 group-hover:text-primary-hover">
+                AIAgent
+              </h1>
+              <span className="text-xs text-accent/60 font-medium">Smart Solutions</span>
+            </div>
+          </a>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {navItems.map((item) => (
+              <a 
+                key={item.path}
+                href={item.path}
+                onClick={(e) => handleNavClick(e, item.path)}
+                className={`relative px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 group ${
+                  isActive(item.path) 
+                    ? 'text-primary' 
+                    : 'text-accent/80 hover:text-primary'
+                }`}
+              >
+                <item.icon className={`w-4 h-4 transition-transform duration-300 ${isActive(item.path) ? 'scale-110' : 'group-hover:scale-110'}`} />
+                <span>{item.label}</span>
+                {isActive(item.path) && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-primary rounded-full"></span>
+                )}
+                {!isActive(item.path) && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-primary rounded-full transition-all duration-300 group-hover:w-12"></span>
+                )}
+              </a>
+            ))}
+          </nav>
+
+          {/* Auth Button Desktop */}
+          <div className="hidden lg:flex items-center gap-3">
+            {isLoggedIn ? (
+              <button 
+                onClick={handleLogout} 
+                className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-semibold flex items-center gap-2 shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                <FaSignOutAlt className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
+            ) : (
+              <a 
+                href="/login"
+                onClick={(e) => handleNavClick(e, '/login')}
+                className="px-5 py-2.5 bg-gradient-to-r from-primary to-primary-hover text-background rounded-lg font-semibold flex items-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                <FaSignInAlt className="w-4 h-4" />
+                <span>Login</span>
+              </a>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
           <button 
             onClick={toggleMenu} 
-            className="text-primary focus:outline-none p-2 rounded-lg hover:bg-secondary-hover transition-colors duration-200"
+            className="lg:hidden p-2.5 rounded-lg text-primary hover:bg-primary/10 transition-all duration-300 active:scale-95"
             aria-label="Toggle menu"
           >
-            <FaBars size={24} />
+            {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
           </button>
         </div>
-      </div>
-      {/* Overlay */}
+      </header>
+
+      {/* Spacer to prevent content jump */}
+      <div className="h-16 md:h-20"></div>
+
+      {/* Mobile Menu Overlay */}
       <div 
-        className={`fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm transition-opacity duration-300 z-40 ${
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 z-40 lg:hidden ${
           isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={toggleMenu}
       ></div>
-      {/* Sidebar */}
-      <div className={`fixed top-0 left-0 h-full bg-secondary w-72 shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
-        isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+
+      {/* Mobile Sidebar */}
+      <div className={`fixed top-0 right-0 h-full bg-secondary w-80 shadow-2xl transform transition-transform duration-300 ease-out z-50 lg:hidden ${
+        isMenuOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
-        <div className="flex justify-between items-center p-6 border-b border-primary/20">
-          <h2 className="text-xl font-bold text-primary">Menu</h2>
+        {/* Sidebar Header */}
+        <div className="flex justify-between items-center p-6 border-b border-primary/20 bg-gradient-to-r from-primary/10 to-transparent">
+          <div className="flex items-center gap-3">
+            <img src="/img/logo.png" alt="AIAgent" className="h-10 w-10" />
+            <div>
+              <h2 className="text-lg font-bold text-primary">AIAgent</h2>
+              <span className="text-xs text-accent/60">Navigation</span>
+            </div>
+          </div>
           <button 
             onClick={toggleMenu} 
-            className="text-primary focus:outline-none p-2 rounded-lg hover:bg-secondary-hover transition-colors duration-200"
+            className="p-2 rounded-lg text-primary hover:bg-primary/10 transition-all duration-300 active:scale-95"
             aria-label="Close menu"
           >
-            <FaTimes size={24} />
+            <FaTimes size={22} />
           </button>
         </div>
-        <nav className="flex flex-col p-6 space-y-2">
-          <a 
-            href="/" 
-            className={`nav-link-mobile ${isActive('/') ? 'bg-primary text-background' : ''}`} 
-            onClick={toggleMenu}
-          >
-            Home
-          </a>
-          <a 
-            href="/chatbot" 
-            className={`nav-link-mobile ${isActive('/chatbot') ? 'bg-primary text-background' : ''}`} 
-            onClick={toggleMenu}
-          >
-            Chatbot
-          </a>
-          <a 
-            href="/agents" 
-            className={`nav-link-mobile ${isActive('/agents') ? 'bg-primary text-background' : ''}`} 
-            onClick={toggleMenu}
-          >
-            Agents
-          </a>
-          <a 
-            href="/readme" 
-            className={`nav-link-mobile ${isActive('/readme') ? 'bg-primary text-background' : ''}`} 
-            onClick={toggleMenu}
-          >
-            README
-          </a>
-          <a 
-            href="/contact" 
-            className={`nav-link-mobile ${isActive('/contact') ? 'bg-primary text-background' : ''}`} 
-            onClick={toggleMenu}
-          >
-            Contact
-          </a>
-          <div className="pt-4 mt-4 border-t border-primary/20">
-            {isLoggedIn ? (
-              <button onClick={handleLogout} className="btn-primary w-full">Logout</button>
-            ) : (
-              <a href="/login" className="btn-primary text-center block w-full" onClick={toggleMenu}>Login</a>
-            )}
-          </div>
+
+        {/* Sidebar Navigation */}
+        <nav className="flex flex-col p-4 space-y-1 overflow-y-auto h-[calc(100%-160px)]">
+          {navItems.map((item, index) => (
+            <a 
+              key={item.path}
+              href={item.path}
+              onClick={(e) => handleNavClick(e, item.path)}
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-lg font-medium transition-all duration-300 ${
+                isActive(item.path) 
+                  ? 'bg-primary text-background shadow-lg shadow-primary/20 scale-[1.02]' 
+                  : 'text-accent hover:bg-primary/10 hover:text-primary hover:translate-x-1'
+              }`}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              <span>{item.label}</span>
+              {isActive(item.path) && (
+                <div className="ml-auto w-2 h-2 bg-background rounded-full"></div>
+              )}
+            </a>
+          ))}
         </nav>
+
+        {/* Sidebar Footer */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary/20 bg-gradient-to-t from-secondary/50 to-transparent">
+          {isLoggedIn ? (
+            <button 
+              onClick={handleLogout} 
+              className="w-full px-5 py-3.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 hover:scale-[1.02] active:scale-95"
+            >
+              <FaSignOutAlt className="w-5 h-5" />
+              <span>Logout</span>
+            </button>
+          ) : (
+            <a 
+              href="/login" 
+              onClick={(e) => handleNavClick(e, '/login')}
+              className="w-full px-5 py-3.5 bg-gradient-to-r from-primary to-primary-hover text-background rounded-lg font-semibold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 hover:scale-[1.02] active:scale-95"
+            >
+              <FaSignInAlt className="w-5 h-5" />
+              <span>Login</span>
+            </a>
+          )}
+        </div>
       </div>
-    </header>
+    </>
   );
 }

@@ -11,6 +11,14 @@ export default function Agent() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.documentElement.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, []);
+
+  useEffect(() => {
     const handleStorage = () => setIsLoggedIn(!!localStorage.getItem('token'));
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
