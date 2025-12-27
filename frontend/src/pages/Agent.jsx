@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { FiMail, FiBarChart, FiHelpCircle, FiFileText, FiUsers, FiCalendar, FiList, FiSearch, FiPlay } from 'react-icons/fi';
@@ -43,14 +43,46 @@ const Agent = () => {
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [session, setSession] = useState(null);
+  const mainContentRef = useRef(null);
 
-  React.useEffect(() => {
-    const state = location.state;
-    if (state?.agentId && !selectedAgent) {
-      const found = allAgents.find(a => a.id === state.agentId);
-      if (found) setSelectedAgent(found);
+  useEffect(() => {
+    const agentId = location.state?.agentId;
+    const sessionId = location.state?.sessionId;
+    const token = localStorage.getItem('token');
+
+    if (agentId && agentId !== selectedAgent?.id) {
+      const found = allAgents.find(a => a.id === agentId);
+      if (found) {
+        setSelectedAgent(found);
+        setSelectedFile(null);
+        setPrompt('');
+        setResponse('');
+        setSession(null);
+        if (mainContentRef.current) {
+          mainContentRef.current.scrollTo(0, 0);
+        }
+      }
     }
-  }, [location.state, selectedAgent]);
+    
+    if (sessionId && sessionId !== session) {
+      const fetchSessionHistory = async () => {
+        try {
+          const res = await axios.get(`/core/chat/session/${sessionId}/`, {
+            headers: { Authorization: `Token ${token}` }
+          });
+          setSession(sessionId);
+          const fullConversation = res.data.map(m => `${m.sender}: ${m.text}`).join('\n\n');
+          setResponse(fullConversation);
+        } catch (error) {
+          console.error("Failed to load session history", error);
+          showError(error, "Failed to load chat history.");
+          navigate('/agent', { replace: true });
+        }
+      };
+      fetchSessionHistory();
+    }
+  }, [location.state?.agentId, location.state?.sessionId, selectedAgent, session, navigate]);
 
   const filteredAgents = useMemo(() => 
     allAgents.filter(agent => 
@@ -71,9 +103,11 @@ const Agent = () => {
     setSelectedFile(null);
     setPrompt('');
     setResponse('');
+    setSession(null);
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo(0, 0);
+    }
   };
-
-  
 
   const showError = (error, fallback = 'Error communicating with the agent.') => {
     let msg = fallback;
@@ -96,24 +130,42 @@ const Agent = () => {
     e.preventDefault();
     if (!prompt.trim() || !selectedAgent) return;
 
-    // Default one-shot flow for other agents
     setIsLoading(true);
-    setResponse('');
+    const currentPrompt = prompt;
+    setPrompt('');
 
     try {
       let res;
+      const payload = { 
+        prompt: currentPrompt, 
+        agent: selectedAgent.id,
+        session_id: session, 
+      };
+
       if (selectedAgent.id === 'excel' && selectedFile) {
         const formData = new FormData();
-        formData.append('prompt', prompt);
-        formData.append('agent', 'excel');
+        Object.keys(payload).forEach(key => {
+          if (payload[key] !== null) formData.append(key, payload[key]);
+        });
         formData.append('file', selectedFile);
+
         res = await axios.post('/agent/respond/', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       } else {
-        res = await axios.post('/agent/respond/', { prompt, agent: selectedAgent.id });
+        res = await axios.post('/agent/respond/', payload);
       }
-      setResponse(res.data.response);
+      
+      const responseData = res.data.response;
+      const resultText = (typeof responseData === 'object' && responseData !== null && responseData.result)
+        ? responseData.result
+        : responseData;
+      
+      setResponse(prev => `${prev}\n\nuser: ${currentPrompt}\n\nagent: ${resultText}`);
+      if (res.data.session_id) {
+        setSession(res.data.session_id);
+      }
+
     } catch (error) {
       showError(error);
     }
@@ -163,13 +215,24 @@ const Agent = () => {
             ))}
           </ul>
         </aside>
-        <section className="w-full md:w-3/4 p-8 overflow-y-auto">
+        <section ref={mainContentRef} className="w-full md:w-3/4 p-8 overflow-y-auto">
           {selectedAgent ? (
             <div className="animate-fade-in h-full">
               <h1 className="text-4xl font-display font-extrabold text-primary mb-2">{selectedAgent.name}</h1>
               <p className="text-lg text-accent/80 mb-8">{selectedAgent.description}</p>
 
-              {React.createElement(agentComponents[selectedAgent.id], { selectedAgent, prompt, setPrompt, response, setResponse, isLoading, setIsLoading, handleSubmit })}
+              {React.createElement(agentComponents[selectedAgent.id], { 
+                selectedAgent, 
+                prompt, 
+                setPrompt, 
+                response, 
+                setResponse, 
+                isLoading, 
+                setIsLoading, 
+                handleSubmit,
+                selectedFile,
+                setSelectedFile,
+              })}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">

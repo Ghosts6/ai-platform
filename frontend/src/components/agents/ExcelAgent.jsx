@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from '../../api/axios';
-import Swal from 'sweetalert2';
+import React, { useEffect, useRef, useMemo } from 'react';
 import FileUpload from '../FileUpload';
-import { FiPlay } from 'react-icons/fi';
+import { FiPlay, FiCopy } from 'react-icons/fi';
+import Swal from 'sweetalert2';
 
-const ExcelAgent = ({ selectedAgent, prompt, setPrompt, response, setResponse, isLoading, setIsLoading, handleSubmit: genericHandleSubmit }) => {
-  const [excelMessages, setExcelMessages] = useState([]); // {sender: 'user'|'agent', text: string}
-  const [excelSessionId, setExcelSessionId] = useState(null);
-  const [excelTyping, setExcelTyping] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
+const ExcelAgent = ({ selectedAgent, prompt, setPrompt, response, isLoading, handleSubmit, selectedFile, setSelectedFile }) => {
   const chatEndRef = useRef(null);
 
-  useEffect(() => {
-    if (chatEndRef.current && excelMessages.length > 0) {
+  const excelMessages = useMemo(() => {
+    if (!response) return [];
+    return response.split('\n\n').map(line => {
+      const [sender, ...textParts] = line.split(': ');
+      return { sender, text: textParts.join(': ') };
+    });
+  }, [response]);
+
+  /* useEffect(() => {
+    if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [excelMessages, excelTyping]);
+  }, [excelMessages]); */
 
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
@@ -41,61 +44,9 @@ const ExcelAgent = ({ selectedAgent, prompt, setPrompt, response, setResponse, i
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (prompt.trim()) {
-        const fakeEvent = { preventDefault: () => {} };
-        handleSubmit(fakeEvent);
+        handleSubmit(e);
       }
     }
-  };
-
-  const showError = (error, fallback = 'Error communicating with the agent.') => {
-    let msg = fallback;
-    if (error?.response?.data?.error) {
-      msg = error.response.data.error;
-    } else if (typeof error?.message === 'string') {
-      msg = error.message;
-    }
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: msg,
-      background: '#222831',
-      color: '#EEEEEE',
-      confirmButtonColor: '#00ADB5',
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!prompt.trim()) return;
-
-    const userMsg = { sender: 'user', text: prompt };
-    setExcelMessages(prev => [...prev, userMsg]);
-    setExcelTyping(true);
-    setPrompt('');
-    try {
-      let res;
-      if (selectedFile) {
-        const formData = new FormData();
-        formData.append('prompt', userMsg.text);
-        formData.append('agent', 'excel');
-        if (excelSessionId) formData.append('session_id', excelSessionId);
-        formData.append('file', selectedFile);
-        res = await axios.post('/agent/respond/', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-      } else {
-        const payload = { prompt: userMsg.text, agent: 'excel' };
-        if (excelSessionId) payload.session_id = excelSessionId;
-        res = await axios.post('/agent/respond/', payload);
-      }
-      const agentText = res.data.response;
-      const newSessionId = res.data.session_id || excelSessionId;
-      if (newSessionId && newSessionId !== excelSessionId) setExcelSessionId(newSessionId);
-      setExcelMessages(prev => [...prev, { sender: 'agent', text: agentText }]);
-    } catch (error) {
-      showError(error, 'Error communicating with the Excel agent.');
-    }
-    setExcelTyping(false);
   };
 
   return (
@@ -108,7 +59,7 @@ const ExcelAgent = ({ selectedAgent, prompt, setPrompt, response, setResponse, i
       </div>
 
       <div className="flex flex-col gap-3 max-h-[50vh] overflow-y-auto p-4 bg-background/50 rounded-xl border border-primary/20">
-        {excelMessages.length === 0 && (
+        {excelMessages.length === 0 && !isLoading && (
           <div className="text-accent/60 text-sm">
             Start by uploading a file (CSV, TSV, JSON, XLS/XLSX) and ask things like "describe", "head", "columns", "rows", or "convert to xlsx".
           </div>
@@ -122,12 +73,12 @@ const ExcelAgent = ({ selectedAgent, prompt, setPrompt, response, setResponse, i
                 className="text-accent/50 hover:text-accent transition-colors"
                 title="Copy"
               >
-                <FiPlay className="w-4 h-4" />
+                <FiCopy className="w-4 h-4" />
               </button>
             </div>
           </div>
         ))}
-        {excelTyping && (
+        {isLoading && (
           <div className="self-start max-w-[60%] p-3 rounded-lg bg-surface/70 border border-primary/20 text-accent/70 text-sm">
             Typing...
           </div>
@@ -145,7 +96,7 @@ const ExcelAgent = ({ selectedAgent, prompt, setPrompt, response, setResponse, i
         />
         <button
           type="submit"
-          disabled={!prompt.trim()}
+          disabled={isLoading || !prompt.trim()}
           className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-hover transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-primary/25"
         >
           <FiPlay className="w-5 h-5" />

@@ -24,6 +24,10 @@ module.exports = {
         body: ['Inter', 'ui-sans-serif', 'system-ui'],
       },
       keyframes: {
+        'gradient-x': {
+          '0%, 100%': { 'background-position': '0% 50%' },
+          '50%': { 'background-position': '100% 50%' },
+        },
         typing: {
           '0%': { width: '0' },
           '100%': { width: '100%' },
@@ -33,6 +37,7 @@ module.exports = {
         },
       },
       animation: {
+        'gradient-x': 'gradient-x 5s ease infinite',
         typing: 'typing 2s steps(20, end), blink .75s step-end infinite',
       },
     },
