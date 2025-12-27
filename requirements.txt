@@ -12,6 +12,7 @@ psycopg2-binary==2.9.10
 sqlparse==0.5.3
 
 # Web & Networking
+aiohttp==3.9.5
 asgiref==3.9.1
 beautifulsoup4==4.13.4
 charset-normalizer==3.4.2

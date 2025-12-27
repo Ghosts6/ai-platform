@@ -11,8 +11,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/agent/', include('ai_agent.agent.urls')),
     path('api/profiles/', include('ai_agent.profiles.urls')),
-    path('api/core/', include('ai_agent.core_services.urls')),
-    path('core/', include('ai_agent.core_services.urls')),
+    path('api/core/', include(('ai_agent.core_services.urls', 'core_services'))),
     path('scheduler/', include('ai_agent.scheduler.urls')),
     path('utils/', include('ai_agent.shared_utils.urls')),
     path('ms_auth/', include('ai_agent.ms_auth.urls')),
@@ -39,6 +38,3 @@ if settings.DEBUG:
 # Custom error handlers
 handler404 = 'django.views.defaults.page_not_found'
 handler500 = 'django.views.defaults.server_error'
-
-# Catch-all for React routing
-urlpatterns.append(re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")))

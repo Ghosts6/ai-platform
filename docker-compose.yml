@@ -16,17 +16,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ai_platform_network
 
   migrate:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    command: python manage.py migrate --noinput
+    command: >
+      sh -c "python manage.py migrate --noinput && python manage.py seed_agents"
     env_file:
       - ./.env
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - ai_platform_network
 
   redis:
     image: redis:6.2-alpine
@@ -37,6 +42,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ai_platform_network
 
   minio:
     image: minio/minio:latest
@@ -48,6 +55,8 @@ services:
     env_file:
       - ./.env
     command: server /data --console-address ":9001"
+    networks:
+      - ai_platform_network
 
   elasticsearch:
     image: elasticsearch:8.11.1
@@ -58,6 +67,16 @@ services:
       - xpack.security.enabled=false
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - ai_platform_network
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks:
+      - ai_platform_network
 
   backend:
     build:
@@ -67,10 +86,17 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      mailhog:
+        condition: service_started
     env_file:
       - ./.env
     ports:
       - "8000:8000"
+    volumes:
+      - ./ai_agent:/app/ai_agent
+      - ./ai_agent/data:/app/ai_agent/data
+    networks:
+      - ai_platform_network
 
   celery:
     build:
@@ -82,6 +108,8 @@ services:
         condition: service_completed_successfully
     env_file:
       - ./.env
+    networks:
+      - ai_platform_network
 
   frontend:
     build:
@@ -91,6 +119,12 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    networks:
+      - ai_platform_network
+
+networks:
+  ai_platform_network:
+    driver: bridge
 
 volumes:
   postgres_data:

@@ -2,8 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from .models import ContactMessage, ChatSession, ChatMessage
 from .serializers import ContactMessageSerializer, ChatSessionSerializer, ChatMessageSerializer
+from asgiref.sync import sync_to_async
+import uuid
 
 class ContactMessageView(APIView):
     permission_classes = [AllowAny]
@@ -47,3 +50,23 @@ class LastChatSessionView(APIView):
             serializer = ChatSessionSerializer(session)
             return Response(serializer.data)
         return Response({'error': 'No chat session found.'}, status=404)
+
+class ChatSessionDeleteView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, session_id):
+        try:
+            # Validate session_id is a valid UUID
+            uuid.UUID(str(session_id))
+        except ValueError:
+            return Response({'error': 'Invalid session ID format.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            session = ChatSession.objects.get(id=session_id, user=request.user)
+            session.delete()
+            return Response({'message': 'Chat session deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+        except ChatSession.DoesNotExist:
+            return Response({'error': 'Chat session not found or you do not have permission to delete it.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

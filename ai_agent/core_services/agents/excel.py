@@ -7,13 +7,9 @@ import datetime
 import pandas as pd
 import tempfile
 from asgiref.sync import sync_to_async
+from ai_agent.core_services.models import Agent
+import openai
 
-try:
-    from openai import OpenAI
-except Exception:
-    OpenAI = None
-
-# Optional dependency checks
 try:
     import openpyxl  # noqa: F401
     OPENPYXL_AVAILABLE = True
@@ -21,16 +17,18 @@ except Exception:
     OPENPYXL_AVAILABLE = False
 
 class ExcelAgent(AgentBase):
-    def __init__(self, agent_id: str, name: str, description: str = "", user=None, file_path=None):
-        super().__init__(agent_id, name, description)
+    def __init__(self, agent_instance: Agent, user=None, file_path=None, **kwargs):
+        super().__init__(agent_instance)
         self.user = user
         self.file_path = file_path
         self.account = None
+        self.client = kwargs.get('client') or openai.OpenAI()
 
     async def _ensure_account(self):
-        if self.account is not None:
+        if self.account is not None and self.account.is_authenticated:
             return
         if not self.user or not getattr(self.user, 'is_authenticated', False):
+            self.account = None
             return
         try:
             token_data = await sync_to_async(O365Token.objects.get)(user=self.user)
@@ -43,7 +41,7 @@ class ExcelAgent(AgentBase):
                 }
                 self.account = Account(credentials, auth_flow_type='authorization', token=token)
         except O365Token.DoesNotExist:
-            pass
+            self.account = None
 
     def _read_dataframe(self, path: str) -> pd.DataFrame:
         lower = path.lower()
@@ -95,12 +93,10 @@ class ExcelAgent(AgentBase):
             pass
         return int(df.shape[0])
 
-    def _llm_answer(self, question: str, df: pd.DataFrame) -> Optional[str]:
-        api_key = os.getenv('OPENAI_API_KEY')
-        if not api_key or OpenAI is None:
+    async def _llm_answer(self, question: str, df: pd.DataFrame) -> Optional[str]:
+        if not self.client:
             return None
         try:
-            client = OpenAI()
             context = self._df_context(df)
             system = (
                 "You are a helpful data analyst. You will be given a short context with table columns, "
@@ -108,7 +104,7 @@ class ExcelAgent(AgentBase):
                 "based on this context. If the answer is ambiguous, state assumptions succinctly. Keep the answer concise."
             )
             user_msg = f"Context (from uploaded file):\n\n{context}\n\nQuestion: {question}"
-            resp = client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model=os.getenv('OPENAI_MODEL', 'gpt-4o-mini'),
                 messages=[
                     {"role": "system", "content": system},
@@ -117,7 +113,7 @@ class ExcelAgent(AgentBase):
                 temperature=0.2,
                 max_tokens=400,
             )
-            return resp.choices[0].message.content.strip()
+            return response.choices[0].message.content.strip()
         except Exception:
             return None
 
@@ -127,7 +123,7 @@ class ExcelAgent(AgentBase):
 
             prompt_lower = prompt.lower()
             if "convert to xlsx" in prompt_lower or "to xlsx" in prompt_lower:
-                with tempfile.NamedTemporaryFile(prefix="converted_", suffix=".xlsx", delete=False) as tmp:
+                with tempfile.NamedTemporaryFile(prefix="converted_", suffix=".xlsx", delete=False, dir=os.path.dirname(self.file_path)) as tmp:
                     out_path = tmp.name
                 try:
                     df.to_excel(out_path, index=False)
@@ -136,7 +132,7 @@ class ExcelAgent(AgentBase):
                     return {"error": f"ExcelAgent: Conversion failed: {e}"}
 
             if "summarize" in prompt_lower or "summarise" in prompt_lower or "summary" in prompt_lower:
-                llm = self._llm_answer("Provide a brief, bullet-point summary of this dataset.", df)
+                llm = await self._llm_answer("Provide a brief, bullet-point summary of this dataset.", df)
                 if llm:
                     return {"result": f"ExcelAgent (summary):\n{llm}"}
                 return {"result": f"ExcelAgent: Columns {list(df.columns)} | Rows {len(df)}"}
@@ -154,7 +150,7 @@ class ExcelAgent(AgentBase):
             if "rows" in prompt_lower or "count" in prompt_lower:
                 return {"result": f"ExcelAgent: Row count: {len(df)}"}
 
-            llm_answer = self._llm_answer(prompt, df)
+            llm_answer = await self._llm_answer(prompt, df)
             if llm_answer:
                 return {"result": f"ExcelAgent: {llm_answer}"}
 
@@ -178,7 +174,7 @@ class ExcelAgent(AgentBase):
             storage = self.account.storage()
             my_drive = storage.get_default_drive()
             root_folder = my_drive.get_root_folder()
-            files = root_folder.get_items()
+            files = await sync_to_async(root_folder.get_items)()
             file_list = [item.name for item in files]
             return {"result": f"ExcelAgent: Here are some of your files in OneDrive: {file_list}"}
 
@@ -187,6 +183,4 @@ class ExcelAgent(AgentBase):
 
     def get_capabilities(self) -> List[str]:
         return ["read_files_from_onedrive", "create_excel_file", "process_uploaded_file"]
-
-__all__ = ["ExcelAgent"]
 

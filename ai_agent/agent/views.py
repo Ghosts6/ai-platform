@@ -1,143 +1,95 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import JSONParser, MultiPartParser
+
+from django.conf import settings
 from .agent_manager import AgentRouter
-from ai_agent.core_services.models import AgentMemory, ChatSession, ChatMessage
-from rest_framework.authtoken.models import Token
-from django.contrib.auth.models import AnonymousUser
-from asgiref.sync import async_to_sync
+from ai_agent.core_services.models import ChatSession, ChatMessage
+from asgiref.sync import async_to_sync, sync_to_async
 import os
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = AgentRouter()
 
-def index(request):
-    return JsonResponse({'message': 'Agent API root'})
+class IndexView(APIView):
+    def get(self, request):
+        return Response({'message': 'Welcome to the AIAgent API. Please use the /api/agent/respond endpoint to interact with agents.'})
 
-@csrf_exempt
-def respond_to_prompt(request):
-    if request.method == 'POST':
-        try:
-            prompt = ''
-            session_id = None
-            agent_key = None
-            file_path = None
+
+class AgentResponseView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    parser_classes = [JSONParser, MultiPartParser]
+
+    def post(self, request, *args, **kwargs):
+        return async_to_sync(self.async_post)(request, *args, **kwargs)
+
+    async def async_post(self, request, *args, **kwargs):
+        prompt = request.data.get('prompt')
+        session_id = request.data.get('session_id')
+        agent_key = request.data.get('agent')
+        
+        if not prompt:
+            return Response({'error': 'Prompt is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        file_path = None
+        uploaded_file = request.FILES.get('file')
+
+        if uploaded_file:
+            # Create a temporary directory if it doesn't exist
+            temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_uploads')
+            os.makedirs(temp_dir, exist_ok=True)
             
-            if 'multipart/form-data' in request.content_type:
-                prompt = request.POST.get('prompt', '')
-                session_id = request.POST.get('session_id')
-                agent_key = request.POST.get('agent')
-                if 'file' in request.FILES:
-                    uploaded_file = request.FILES['file']
-                    temp_dir = '/tmp'
-                    if not os.path.exists(temp_dir):
-                        os.makedirs(temp_dir)
-                    original_name = getattr(uploaded_file, 'name', '') or ''
-                    _, ext = os.path.splitext(original_name)
-                    # Default to .xlsx if no extension is provided
-                    safe_ext = ext if ext else '.xlsx'
-                    file_path = os.path.join(temp_dir, f"{uuid.uuid4()}{safe_ext}")
-                    with open(file_path, 'wb+') as destination:
-                        for chunk in uploaded_file.chunks():
-                            destination.write(chunk)
+            # Create a unique filename to avoid overwrites
+            file_name = f"{uuid.uuid4()}_{uploaded_file.name}"
+            file_path = os.path.join(temp_dir, file_name)
+            
+            # Write the uploaded file to the temporary location
+            with open(file_path, 'wb+') as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+        
+        try:
+            response_data = await router.route(
+                prompt,
+                user=request.user,
+                agent_key=agent_key,
+                file_path=file_path
+            )
+
+            if request.user.is_authenticated:
+                session = None
+                if session_id:
+                    try:
+                        session = await sync_to_async(ChatSession.objects.get)(id=session_id, user=request.user)
+                    except ChatSession.DoesNotExist:
+                        session = await sync_to_async(ChatSession.objects.create)(user=request.user)
+                else:
+                    session = await sync_to_async(ChatSession.objects.create)(user=request.user)
+
+                # Extract the string for saving, but send the full object back
+                if isinstance(response_data, dict) and 'result' in response_data:
+                    text_to_save = response_data['result']
+                else:
+                    text_to_save = response_data
+                
+                await sync_to_async(ChatMessage.objects.create)(session=session, sender='user', text=prompt)
+                await sync_to_async(ChatMessage.objects.create)(session=session, sender='agent', text=text_to_save)
+                
+                return Response({'response': response_data, 'session_id': str(session.id)}, status=status.HTTP_200_OK)
             else:
-                data = json.loads(request.body)
-                prompt = data.get('prompt', '')
-                session_id = data.get('session_id')
-                agent_key = data.get('agent')
+                return Response({'response': response_data}, status=status.HTTP_200_OK)
 
-            user = AnonymousUser()
-            auth_header = request.META.get('HTTP_AUTHORIZATION')
-            if auth_header and auth_header.startswith('Token '):
-                token_key = auth_header.split(' ')[1]
-                try:
-                    token = Token.objects.get(key=token_key)
-                    user = token.user
-                except Token.DoesNotExist:
-                    pass
-
-            if not prompt:
-                return JsonResponse({'error': 'Prompt is required'}, status=400)
-
-            response_text = async_to_sync(router.route)(prompt, user=user, agent_key=agent_key, file_path=file_path)
-
+        except Exception as e:
+            logger.error(f"Error processing agent request: {e}", exc_info=True)
+            return Response({'error': 'An unexpected error occurred during agent processing.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        finally:
+            # Clean up the temporary file if it was created
             if file_path and os.path.exists(file_path):
                 os.remove(file_path)
-
-            if user.is_authenticated:
-                if session_id:
-                    session = ChatSession.objects.get(id=session_id, user=user)
-                else:
-                    session = ChatSession.objects.create(user=user)
-                
-                ChatMessage.objects.create(session=session, sender='user', text=prompt)
-                ChatMessage.objects.create(session=session, sender='agent', text=response_text)
-                
-                return JsonResponse({'response': response_text, 'session_id': session.id})
-            else:
-                return JsonResponse({'response': response_text})
-
-        except Exception as e:
-            if 'file_path' in locals() and file_path and os.path.exists(file_path):
-                os.remove(file_path)
-            return JsonResponse({'error': str(e)}, status=500)
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-@csrf_exempt
-def agent_memory(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            agent = data.get('agent')
-            key = data.get('key')
-            value = data.get('value')
-            if not (agent and key and value is not None):
-                return JsonResponse({'error': 'Missing agent, key, or value'}, status=400)
-            AgentMemory.objects.update_or_create(
-                agent_name=agent, key=key, defaults={'value': value}
-            )
-            return JsonResponse({'status': 'ok'})
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    elif request.method == 'GET':
-        agent = request.GET.get('agent')
-        key = request.GET.get('key')
-        if not (agent and key):
-            return JsonResponse({'error': 'Missing agent or key'}, status=400)
-        try:
-            value = AgentMemory.objects.get(agent_name=agent, key=key).value
-            return JsonResponse({'agent': agent, 'key': key, 'value': value})
-        except AgentMemory.DoesNotExist:
-            return JsonResponse({'agent': agent, 'key': key, 'value': None})
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-@csrf_exempt
-def agent_memory_list(request):
-    if request.method == 'GET':
-        agent = request.GET.get('agent')
-        if not agent:
-            return JsonResponse({'error': 'Missing agent'}, status=400)
-        memories = AgentMemory.objects.filter(agent_name=agent)
-        return JsonResponse({
-            'agent': agent,
-            'memories': [
-                {'key': m.key, 'value': m.value, 'updated_at': m.updated_at.isoformat()} for m in memories
-            ]
-        })
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-@csrf_exempt
-def agent_memory_delete(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            agent = data.get('agent')
-            key = data.get('key')
-            if not (agent and key):
-                return JsonResponse({'error': 'Missing agent or key'}, status=400)
-            AgentMemory.objects.filter(agent_name=agent, key=key).delete()
-            return JsonResponse({'status': 'deleted'})
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    return JsonResponse({'error': 'Invalid request method'}, status=405)

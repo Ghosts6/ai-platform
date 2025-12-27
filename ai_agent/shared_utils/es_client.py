@@ -1,6 +1,7 @@
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, AsyncElasticsearch
 from django.conf import settings
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -26,3 +27,11 @@ def get_es_client():
 # A singleton instance for the application to use.
 # This code will run once when the module is first imported.
 es_client = get_es_client()
+try:
+    async_es_client = AsyncElasticsearch(
+        hosts=[settings.ELASTICSEARCH_HOST]
+    )
+except Exception as e:
+    logger.error(f"Error connecting to Elasticsearch: {e}", exc_info=True)
+    async_es_client = None
+

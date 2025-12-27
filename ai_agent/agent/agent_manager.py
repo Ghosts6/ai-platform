@@ -1,27 +1,24 @@
-from ai_agent.core_services.agents.summarize import SummarizerAgent
-from ai_agent.core_services.agents.qa import QAPairAgent
-from ai_agent.core_services.agents.email import EmailAgent
-from ai_agent.core_services.agents.excel import ExcelAgent
-from ai_agent.core_services.agents.teams import TeamsAgent
-from ai_agent.core_services.agents.calendar import CalendarAgent
-from ai_agent.core_services.models import AgentLog, AgentMemory
+from ai_agent.core_services.models import Agent
+from ai_agent.core_services.agents.base import AgentBase
+from asgiref.sync import sync_to_async
 import openai
 import os
 import asyncio
+import importlib
+import inspect
+import pkgutil
+import logging
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+logger = logging.getLogger(__name__)
 
 class AgentRouter:
     def __init__(self):
-        self.agent_classes = {
-            "summarize": SummarizerAgent,
-            "qa": QAPairAgent,
-            "email": EmailAgent,
-            "excel": ExcelAgent,
-            "teams": TeamsAgent,
-            "calendar": CalendarAgent,
-        }
+        self.agent_classes = {}
+        self.client = openai.OpenAI()
+        self._load_agent_classes()
+
         self.routing_rules = []
+        # These keywords should ideally be stored in the Agent model in the database
         self.register_agent("summarize", "summarize", keywords=["summarize", "summary"])
         self.register_agent("qa", "qa", keywords=["ask", "answer:", "list qas", "delete ", "update "])
         self.register_agent("email", "email", keywords=["email", "inbox", "mail", "draft", "analyze", "reply", "send", "compose", "attachment"])
@@ -29,21 +26,27 @@ class AgentRouter:
         self.register_agent("teams", "teams", keywords=["teams", "maintenance", "survey", "test running"])
         self.register_agent("calendar", "calendar", keywords=["calendar", "event", "meeting", "appointment"])
 
+    def _load_agent_classes(self):
+        """Dynamically loads agent classes from the agents directory."""
+        agents_package = "ai_agent.core_services.agents"
+        package_path = os.path.join(os.path.dirname(__file__), '..', 'core_services', 'agents')
+
+        for _, module_name, _ in pkgutil.iter_modules([package_path]):
+            if module_name not in ["base", "list"]: # Exclude base and deprecated list agent
+                try:
+                    module = importlib.import_module(f".{module_name}", package=agents_package)
+                    for name, obj in inspect.getmembers(module):
+                        if inspect.isclass(obj) and issubclass(obj, AgentBase) and obj is not AgentBase:
+                            # Use the module name as the agent_type key
+                            agent_type = module_name.lower()
+                            self.agent_classes[agent_type] = obj
+                            logger.info(f"Dynamically loaded agent: {agent_type} -> {name}")
+                except Exception as e:
+                    logger.error(f"Failed to load agent from module {module_name}: {e}")
 
     def register_agent(self, name, agent_key, keywords=None):
         if keywords:
             self.routing_rules.append((keywords, agent_key))
-
-    def memory_backend(self, agent_name, key, value=None):
-        if value is not None:
-            obj, _ = AgentMemory.objects.update_or_create(
-                agent_name=agent_name, key=key, defaults={"value": value}
-            )
-            return obj.value
-        try:
-            return AgentMemory.objects.get(agent_name=agent_name, key=key).value
-        except AgentMemory.DoesNotExist:
-            return None
 
     async def route(self, prompt: str, user=None, agent_key=None, file_path=None) -> str:
         best_agent_key = agent_key
@@ -58,20 +61,27 @@ class AgentRouter:
                     best_agent_key = key
         
         if not best_agent_key:
-            best_agent_key = "qa"
+            best_agent_key = "qa"  # Default agent
 
         agent_class = self.agent_classes.get(best_agent_key)
+        if not agent_class:
+            return f"Error: Agent '{best_agent_key}' not found."
+
+        try:
+            # Fetch the Agent model instance from the database
+            agent_model = await sync_to_async(Agent.objects.get)(name=best_agent_key)
+        except Agent.DoesNotExist:
+            return f"Error: Agent model '{best_agent_key}' not found in database."
         
-        agent_params = {"agent_id": best_agent_key, "name": best_agent_key}
-        if best_agent_key in ["email", "excel", "teams", "calendar"]:
-            agent_params["user"] = user
-            if file_path:
-                agent_params["file_path"] = file_path
-        elif best_agent_key == "summarize":
-            agent_params["memory_backend"] = self.memory_backend
+        # Instantiate the agent with the model instance and other dependencies
+        agent = agent_class(
+            agent_instance=agent_model, 
+            client=self.client, 
+            user=user, 
+            file_path=file_path
+        )
 
-        agent = agent_class(**agent_params)
-
-        task = {"prompt": prompt}
-        result = await agent.process(task)
-        return result.get("result", result.get("error"))
+        task = {"prompt": prompt, "type": "text"} # Ensure task has a type
+        result = await agent.handle_task(task) # Use handle_task for logging and state management
+        
+        return result.get("result", result.get("error", "No result returned."))

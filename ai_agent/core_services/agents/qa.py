@@ -2,116 +2,98 @@ import openai
 import os
 import re
 from .base import AgentBase
-from ai_agent.core_services.models import AgentMemory
 from typing import Dict, Any, List, Optional
-from asgiref.sync import sync_to_async
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
+import json
 
 class QAPairAgent(AgentBase):
     """
     An agent that stores prompt-answer pairs, can answer, list, update, and delete QAs.
     Uses OpenAI GPT for answers and stores them for future retrieval.
     """
-    def __init__(self, agent_id: str, name: str, description: str = "", client=None):
-        super().__init__(agent_id, name, description)
-        self.client = client or openai.chat.completions
+    def __init__(self, agent_instance, client=None, **kwargs):
+        super().__init__(agent_instance)
+        self.client = client or openai.OpenAI()
+        self.commands = {
+            "add_qa": re.compile(r"ask\s+(?P<question>.+?)\s+answer:\s*(?P<answer>.+)", re.IGNORECASE),
+            "update_qa": re.compile(r"update\s+(?P<question>.+?)\s+to\s+(?P<answer>.+)", re.IGNORECASE),
+            "delete_qa": re.compile(r"delete\s+(?P<question>.+)", re.IGNORECASE),
+            "list_qas": re.compile(r"list qas", re.IGNORECASE),
+        }
 
-    @sync_to_async
-    def _update_or_create_memory(self, key, value):
-        AgentMemory.objects.update_or_create(agent_name=self.name, key=key, defaults={"value": value})
+    async def _handle_add_qa(self, question: str, answer: str) -> Dict[str, Any]:
+        await self.store_memory(question, {"answer": answer})
+        return {"result": f"Stored QA: '{question}' -> '{answer}'"}
 
-    @sync_to_async
-    def _get_memory(self, key):
-        return AgentMemory.objects.filter(agent_name=self.name, key=key).first()
+    async def _handle_update_qa(self, question: str, answer: str) -> Dict[str, Any]:
+        existing_qa = await self.retrieve_memory(question)
+        if existing_qa:
+            await self.store_memory(question, {"answer": answer})
+            return {"result": f"Updated answer for '{question}' to '{answer}'"}
+        return {"result": f"No QA found for '{question}' to update."}
 
-    @sync_to_async
-    def _delete_memory(self, key):
-        return AgentMemory.objects.filter(agent_name=self.name, key=key).delete()
+    async def _handle_delete_qa(self, question: str) -> Dict[str, Any]:
+        await self.store_memory(question, None) # Overwrite with None to signify deletion
+        return {"result": f"Deleted QA for '{question}'"}
 
-    @sync_to_async
-    def _save_memory(self, mem):
-        mem.save()
+    async def _handle_list_qas(self) -> Dict[str, Any]:
+        if not self.memory:
+            await self._load_memory()
+        
+        qa_list = [f"Q: {q}, A: {data['value']['answer']}" for q, data in self.memory.items() if data and 'answer' in data.get('value', {})]
+        
+        if qa_list:
+            return {"result": "Stored QAs:\n" + "\n".join(qa_list)}
+        return {"result": "No QAs found."}
+
+    async def _handle_question(self, question: str) -> Dict[str, Any]:
+        memory_data = await self.retrieve_memory(question)
+        if memory_data and memory_data.get("answer"):
+            return {"result": f"Answer: {memory_data['answer']}"}
+
+        # RAG workflow
+        context_from_db = await self.search_knowledge_base(question)
+        system_prompt = "You are a helpful assistant."
+        if context_from_db:
+            context_str = "\n\n".join(context_from_db)
+            system_prompt = (
+                "You are a helpful assistant. Answer the user's question based on the context. "
+                "If the context does not contain the answer, say that you don't know.\n\n"
+                f"Context:\n{context_str}"
+            )
+        
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4o",
+                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": question}],
+                temperature=0.5,
+            )
+            answer = response.choices[0].message.content
+            # Only store in memory if it's a definitive answer, not a "I don't know" response
+            if not re.search(r"i don't know|i cannot answer|not found", answer, re.IGNORECASE):
+                await self.store_memory(question, {"answer": answer})
+            return {"result": f"Answer: {answer}"}
+        except Exception as e:
+            return {"error": f"Error: unable to get answer from OpenAI. {str(e)}"}
 
     async def process(self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        prompt = task.get("prompt")
+        prompt = task.get("prompt", "").strip()
         if not prompt:
             raise ValueError("Prompt is missing from the task.")
 
-        prompt_lower = prompt.lower()
-
+        for command_name, pattern in self.commands.items():
+            match = pattern.match(prompt)
+            if match:
+                data = match.groupdict()
+                if command_name == "add_qa":
+                    return await self._handle_add_qa(data['question'], data['answer'])
+                elif command_name == "update_qa":
+                    return await self._handle_update_qa(data['question'], data['answer'])
+                elif command_name == "delete_qa":
+                    return await self._handle_delete_qa(data['question'])
+                elif command_name == "list_qas":
+                    return await self._handle_list_qas()
         
-
-        # Add QA: 'ask What is AI? Answer: Artificial Intelligence.'
-        if prompt_lower.startswith("ask ") and "answer:" in prompt_lower:
-            try:
-                q, a = re.split("answer:", prompt, 1, re.IGNORECASE)
-                q = q.replace("ask", "", 1).strip()
-                a = a.strip()
-                await self._update_or_create_memory(q, a)
-                return {"result": f"Stored QA: '{q}' -> '{a}'"}
-            except Exception:
-                return {"error": "Invalid format. Use: ask <question> Answer: <answer>"}
-        # Update QA: 'update <question> to <new answer>'
-        elif prompt_lower.startswith("update ") and " to " in prompt_lower:
-            try:
-                _, rest = prompt.split("update", 1)
-                q, a = rest.split("to", 1)
-                q, a = q.strip(), a.strip()
-                mem = await self._get_memory(q)
-                if mem:
-                    mem.value = a
-                    await self._save_memory(mem)
-                    return {"result": f"Updated answer for '{q}' to '{a}'"}
-                return {"result": f"No QA found for '{q}'"}
-            except Exception:
-                return {"error": "Invalid update format. Use: update <question> to <new answer>"}
-        # Delete QA: 'delete <question>'
-        elif prompt_lower.startswith("delete "):
-            q = prompt[7:].strip()
-            deleted, _ = await self._delete_memory(q)
-            if deleted:
-                return {"result": f"Deleted QA for '{q}'"}
-            return {"result": f"No QA found for '{q}'"}
-        # Get answer from memory or OpenAI
-        else:
-            q = prompt.strip()
-            mem = await self._get_memory(q)
-            if mem:
-                return {"result": f"Answer: {mem.value}"}
-
-            # RAG workflow
-            context_from_db = self.search_knowledge_base(q)
-
-            if context_from_db:
-                context_str = "\n\n".join(context_from_db)
-                system_prompt = (
-                    "You are a helpful assistant. Answer the user's question based on the following context. "
-                    "If the context does not contain the answer, say that you don't know.\n\n"
-                    f"Context:\n{context_str}"
-                )
-            else:
-                system_prompt = "You are a helpful assistant."
-
-            # If not found, ask OpenAI and store
-            try:
-                response = self.client.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": q}
-                    ],
-                    temperature=0.5,
-                )
-                msg = response.choices[0].message
-                if isinstance(msg, dict):
-                    answer = msg.get('content')
-                else:
-                    answer = msg.content
-                await self._update_or_create_memory(q, answer)
-                return {"result": f"Answer: {answer}"}
-            except Exception as e:
-                return {"error": f"Error: unable to get answer from OpenAI. {str(e)}"}
+        return await self._handle_question(prompt)
 
     def get_capabilities(self) -> List[str]:
-        return ["ask_question", "add_qa", "update_qa", "delete_qa"]
+        return ["ask_question", "add_qa", "update_qa", "delete_qa", "list_qas"]

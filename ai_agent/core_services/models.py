@@ -4,6 +4,7 @@ from django.utils import timezone
 import json
 import uuid
 class ChatSession(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -14,13 +15,20 @@ class ChatMessage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class AgentLog(models.Model):
-    agent_name = models.CharField(max_length=100)
+    STATUS_CHOICES = [
+        ('SUCCESS', 'Success'),
+        ('ERROR', 'Error'),
+    ]
+    agent = models.ForeignKey('Agent', on_delete=models.CASCADE, related_name='logs', null=True, blank=True)
     prompt = models.TextField()
     response = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='SUCCESS')
+    duration = models.FloatField(help_text="Duration of the agent's process in seconds", null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.agent_name} @ {self.created_at}"
+        agent_name = self.agent.name if self.agent else "N/A"
+        return f"{agent_name} @ {self.created_at}"
 
 class AgentMemory(models.Model):
     agent_name = models.CharField(max_length=100)
@@ -119,7 +127,7 @@ class Task(models.Model):
         (4, 'Critical'),
     ]
     
-    id = models.CharField(max_length=36, primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     agent = models.ForeignKey(Agent, on_delete=models.CASCADE, null=True, blank=True)
     task_type = models.CharField(max_length=50)
