@@ -69,13 +69,17 @@ async def test_summarizer_agent_openai(mock_openai, test_user):
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 @patch('ai_agent.core_services.agents.qa.QAPairAgent.search_knowledge_base', new_callable=AsyncMock)
-@patch('ai_agent.core_services.agents.qa.openai.chat.completions.create', new_callable=AsyncMock)
-async def test_qa_agent_openai(mock_create, mock_search_knowledge_base, test_user):
+@patch('ai_agent.core_services.agents.qa.openai.OpenAI')
+async def test_qa_agent_openai(mock_openai, mock_search_knowledge_base, test_user):
     mock_search_knowledge_base.return_value = []
     agent_model, _ = await sync_to_async(Agent.objects.get_or_create)(name="qa", defaults={"agent_type": "qa", "created_by": test_user})
-    mock_response = MagicMock()
-    mock_response.choices = [MagicMock(message=MagicMock(content='Paris'))]
-    mock_create.return_value = mock_response
+
+    mock_client = MagicMock()
+    mock_openai.return_value = mock_client
+    mock_client.chat.completions.create.return_value = MagicMock(
+        choices=[MagicMock(message=MagicMock(content='Paris'))]
+    )
+
     agent = QAPairAgent(agent_instance=agent_model)
     result = await agent.process({"prompt": "What is the capital of France?"})
     assert "Answer:" in result['result']
