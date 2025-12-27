@@ -42,4 +42,4 @@ class Command(BaseCommand):
                 if created:
                     self.stdout.write(self.style.SUCCESS(f"Seeded agent: {agent.name}"))
                 else:
-                    self.stdout.write(self.style.MIGRATE_SKIP(f"Agent '{agent.name}' already exists. Skipping."))
+                    self.stdout.write(self.style.WARNING(f"Agent '{agent.name}' already exists. Skipping."))

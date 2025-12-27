@@ -67,6 +67,11 @@ services:
       - xpack.security.enabled=false
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - ai_platform_network
 
@@ -82,12 +87,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    command: gunicorn --bind 0.0.0.0:8000 ai_agent.backend_core.asgi:application -k uvicorn.workers.UvicornWorker --workers 4
+    command: >
+      sh -c "python manage.py collectstatic --noinput && python manage.py index_documents data && gunicorn --bind 0.0.0.0:8000 ai_agent.backend_core.asgi:application -k uvicorn.workers.UvicornWorker --workers 4"
     depends_on:
       migrate:
         condition: service_completed_successfully
       mailhog:
         condition: service_started
+      elasticsearch:
+        condition: service_healthy
     env_file:
       - ./.env
     ports:

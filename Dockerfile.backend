@@ -10,7 +10,13 @@ WORKDIR /app
 
 # Copy the requirements file and install dependencies
 COPY requirements.txt .
-RUN apt-get update && apt-get install -y postgresql-client && \
+# Apt-get robustness settings
+RUN echo 'Acquire::http::Pipeline-Depth "0";' > /etc/apt/apt.conf.d/99fix-pipeline && \
+    echo 'Acquire::http::No-Cache "true";' >> /etc/apt/apt.conf.d/99fix-pipeline && \
+    echo 'Acquire::BrokenProxy "true";' >> /etc/apt/apt.conf.d/99fix-pipeline && \
+    echo 'Acquire::Retries "5";' >> /etc/apt/apt.conf.d/99fix-pipeline && \
+    echo 'Acquire::ForceIPv4 "true";' >> /etc/apt/apt.conf.d/99fix-pipeline && \
+    apt-get update && apt-get install -y postgresql-client && \
     pip install --no-cache-dir -r requirements.txt && \
     rm -rf /var/lib/apt/lists/*
 
