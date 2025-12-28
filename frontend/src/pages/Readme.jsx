@@ -28,6 +28,18 @@ export default function ReadmePage() {
           setBanner(match[1].replace('/frontend/public', '').replace('?raw=true', ''));
           text = text.replace(bannerRegex, '');
         }
+
+        const videoRegex = /\[AiAgent\.webm\]\(([^)]+)\)/;
+        const videoMatch = text.match(videoRegex);
+        if (videoMatch) {
+            const videoUrl = videoMatch[1];
+            const videoEmbed = `<p align="center">
+                <video controls src="${videoUrl}" style="width: 100%; max-width: 800px; border-radius: 10px; outline: none;">
+                </video>
+              </p>`;
+            text = text.replace(videoRegex, videoEmbed);
+        }
+        
         setReadme(text);
         setLoading(false);
       })
